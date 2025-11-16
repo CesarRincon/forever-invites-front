@@ -40,7 +40,7 @@ export function PublicInvitation() {
     ]
   };
 
-  const handleConfirmation = (guestId: string, status: "confirmed" | "declined") => {
+  const handleConfirmation = (guestId: string, status: "confirmed" | "declined" | "pending") => {
     setGuests(guests.map(g =>
       g.id === guestId ? { ...g, status } : g
     ));
@@ -318,7 +318,6 @@ export function PublicInvitation() {
             </div>
           </div>
         </section>
-
         {/* Footer Message */}
         <section className="py-16 px-4 bg-gradient-to-r from-[#e6b8a2] to-[#d19d86]">
           <div className="max-w-4xl mx-auto text-center">

@@ -3,10 +3,6 @@ import { Calendar, Users, CheckCircle2, XCircle, Heart, Clock, Eye, Link2, Setti
 import { CountdownTimer } from "./CountdownTimer";
 import Link from "next/link";
 
-interface DashboardProps {
-  onNavigate: (page: string) => void;
-}
-
 export function Dashboard() {
   const eventData = {
     coupleName: "María & Alejandro",
@@ -53,14 +49,14 @@ export function Dashboard() {
       icon: Calendar,
       title: "Editar Evento",
       description: "Actualiza detalles de tu boda",
-      action: () => onNavigate("event"),
+      action: () => { },
       color: "from-[#e6b8a2] to-[#d19d86]"
     },
     {
       icon: Users,
       title: "Gestionar Invitados",
       description: "Añade o edita invitados",
-      action: () => onNavigate("guests"),
+      action: () => { },
       color: "from-purple-500 to-purple-600"
     },
     {

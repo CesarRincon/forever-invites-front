@@ -46,7 +46,7 @@ export default function App() {
   // Dashboard Layout (logged in)
   return (
     <div className="flex min-h-screen bg-[#faf3eb]">
-      <Sidebar currentPage={currentPage} onNavigate={handleNavigate} />
+      <Sidebar />
 
       <main className="flex-1 lg:ml-0">
         {/* {currentPage === "dashboard" && <Dashboard onNavigate={handleNavigate} />} */}
