@@ -1,12 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Libre+Bodoni:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Alex+Brush&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&display=swap");
 @import "tailwindcss";
-@layer base {
-  @import url("https://fonts.googleapis.com/css2?family=Libre+Bodoni:wght@400;500;600;700&display=swap");
-  @import url("https://fonts.googleapis.com/css2?family=Alex+Brush&display=swap");
-
-  html {
-    width: 100% !important; /* <-- aquí sí funciona */
-  }
-}
 
 /* Paleta de colores premium para bodas */
 @theme {
@@ -26,23 +22,25 @@
   --font-bodoni: "Libre Bodoni", serif;
   --font-sans: "Inter", system-ui, sans-serif;
   --font-alex: "Alex Brush", cursive;
+  --font-caveat: "Caveat", cursive;
+  --font-cinzel: "Cinzel", cursive;
 }
 
-@font-face {
+/* @font-face {
   font-family: "Playfair Display";
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
   src: url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap");
-}
+} */
 
-@font-face {
+/* @font-face {
   font-family: "Inter";
   font-style: normal;
   font-weight: 300 700;
   font-display: swap;
   src: url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-}
+} */
 
 * {
   box-sizing: border-box;
@@ -54,7 +52,7 @@ html {
 }
 
 body {
-  font-family: var(--font-sans);
+  /* font-family: var(--font-sans); */
   background: #ffffff;
   color: #2d2d2d;
   line-height: 1.6;
@@ -66,7 +64,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-serif);
+  /* font-family: var(--font-serif); */
   font-weight: 600;
   line-height: 1.2;
   color: #1a1a1a;
@@ -138,4 +136,96 @@ p {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #d19d86;
+}
+
+@layer utilities {
+  .fade-in {
+    opacity: 0;
+    animation: fadeIn 1.2s ease forwards;
+  }
+
+  .fade-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 1.2s ease forwards;
+  }
+
+  .fade-down {
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: fadeDown 1.2s ease forwards;
+  }
+
+  .scale-in {
+    opacity: 0;
+    transform: scale(0.95);
+    animation: scaleIn 1s ease forwards;
+  }
+
+  .slide-in {
+    opacity: 0;
+    transform: translateX(40px);
+    animation: slideIn 1.2s ease forwards;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 1.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .reveal.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 {
+    transition-delay: 0.15s;
+  }
+
+  .reveal-delay-2 {
+    transition-delay: 0.3s;
+  }
+
+  .reveal-delay-3 {
+    transition-delay: 0.45s;
+  }
+
+  .reveal-delay-4 {
+    transition-delay: 0.6s;
+  }
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeDown {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
 }

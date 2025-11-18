@@ -2,16 +2,11 @@
 import { Calendar, Users, CheckCircle2, XCircle, Heart, Clock, Eye, Link2, Settings } from "lucide-react";
 import { CountdownTimer } from "./CountdownTimer";
 import Link from "next/link";
+import { useEventStore } from "../store/useEventStore";
 
 export function Dashboard() {
-  const eventData = {
-    coupleName: "María & Alejandro",
-    date: new Date("2025-06-15T18:00:00"),
-    venue: "Hacienda Los Rosales",
-    totalGuests: 150,
-    confirmed: 98,
-    pending: 52,
-  };
+
+  const eventData = useEventStore((state) => state.eventData)
 
   const stats = [
     {
@@ -106,12 +101,12 @@ export function Dashboard() {
                 <Users className="w-5 h-5 text-[#e6b8a2]" />
                 <span>{eventData.venue}</span>
               </div>
-              <button
-                onClick={() => { }}
+              <Link
+                href={'/event'}
                 className="rounded-md hover:shadow-lg transition-all flex items-center absolute top-13 right-13 hover:cursor-pointer"
               >
                 <Settings className="w-5 h-5" />
-              </button>
+              </Link>
             </div>
           </div>
         </div>

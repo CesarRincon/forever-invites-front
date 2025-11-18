@@ -1,24 +1,18 @@
 'use client'
-import { Calendar, MapPin, Palette, Music, Shirt, Upload, Save, Image as ImageIcon } from "lucide-react";
-import { useState } from "react";
+import { Calendar, MapPin, Palette, Music, Shirt, Upload, Save, Image as ImageIcon, X } from "lucide-react";
+import { useRef, useState } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { useEventStore } from "../store/useEventStore";
 
 export function EventForm() {
-  const [eventData, setEventData] = useState({
-    coupleName: "María & Alejandro",
-    date: "2025-06-15",
-    time: "18:00",
-    venue: "Hacienda Los Rosales",
-    address: "Calle Principal 123, Ciudad",
-    color: "#e6b8a2",
-    template: "romantic-garden",
-    music: "",
-    dressCode: "Formal",
-    message: "Nos encantaría que nos acompañes en este día tan especial"
-  });
+  const [coverImage, setCoverImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { eventData, itinerary, setEventData, setItinerary, saveToSupabase } =
+    useEventStore();
+
 
   const templates = [
     { id: "romantic-garden", name: "Jardín Romántico", color: "#f8e8e8" },
@@ -36,12 +30,24 @@ export function EventForm() {
     { name: "Lavender", value: "#e6e6fa" }
   ];
 
-  const [itinerary, setItinerary] = useState([
-    { time: "18:00", event: "Ceremonia" },
-    { time: "19:30", event: "Cóctel" },
-    { time: "21:00", event: "Recepción" },
-    { time: "23:00", event: "Fiesta" }
-  ]);
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setCoverImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
 
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
@@ -67,7 +73,7 @@ export function EventForm() {
               <Input
                 id="coupleName"
                 value={eventData.coupleName}
-                onChange={(e) => setEventData({ ...eventData, coupleName: e.target.value })}
+                onChange={(e) => setEventData({ coupleName: e.target.value })}
                 placeholder="María & Alejandro"
                 className="mt-2"
               />
@@ -272,17 +278,57 @@ export function EventForm() {
         </div>
 
         {/* Cover Image Card */}
-        <div className="bg-white rounded-md p-6 md:p-8 shadow-lg">
+        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
           <h4 className="mb-6 flex items-center gap-2">
             <ImageIcon className="w-5 h-5 text-[#e6b8a2]" />
             Imagen de portada
           </h4>
 
-          <div className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-[#e6b8a2] hover:bg-[#faf3eb] transition-all cursor-pointer">
-            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 mb-2">Haz clic para subir o arrastra una imagen</p>
-            <p className="text-sm text-gray-500">Recomendado: 1920x1080px, máximo 5MB</p>
-          </div>
+          {!coverImage ? (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-[#e6b8a2] hover:bg-[#faf3eb] transition-all cursor-pointer"
+            >
+              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 mb-2">Haz clic para subir o arrastra una imagen</p>
+              <p className="text-sm text-gray-500">Recomendado: 1920x1080px, máximo 5MB</p>
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </div>
+          ) : (
+            <div className="relative rounded-2xl overflow-hidden">
+              <img
+                src={coverImage}
+                alt="Cover preview"
+                className="w-full h-64 object-cover rounded-2xl"
+              />
+              <button
+                onClick={removeImage}
+                className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-all shadow-lg"
+              >
+                <X className="w-2 h-2" />
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-4 right-4 bg-white text-gray-700 px-4 py-2 rounded-md hover:bg-gray-100 transition-all shadow-lg flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                Cambiar imagen
+              </button>
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
@@ -290,12 +336,14 @@ export function EventForm() {
           <button className="flex-1 px-6 py-4 border-2 border-gray-300 rounded-md hover:bg-gray-50 transition-all">
             Cancelar
           </button>
-          <button className="flex-1 px-6 py-4 bg-gradient-to-r from-[#e6b8a2] to-[#d19d86] text-white rounded-md hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center gap-2">
+          <button
+
+            className="flex-1 px-6 py-4 bg-gradient-to-r from-[#e6b8a2] to-[#d19d86] text-white rounded-md hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center gap-2">
             <Save className="w-5 h-5" />
             Guardar cambios
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

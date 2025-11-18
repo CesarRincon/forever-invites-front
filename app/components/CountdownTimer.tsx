@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 interface CountdownTimerProps {
-  targetDate: Date;
+  targetDate: Date | string;
   variant?: "default" | "elegant";
 }
 
@@ -45,11 +45,11 @@ export function CountdownTimer({ targetDate, variant = "default" }: CountdownTim
       <div className="flex justify-center gap-4 md:gap-8">
         {Object.entries(timeLeft).map(([unit, value]) => (
           <div key={unit} className="text-center">
-            <div className="bg-white/80 backdrop-blur-sm rounded-md p-4 md:p-6 shadow-lg border border-[#e6b8a2]/20 min-w-[70px] md:min-w-[90px]">
-              <div className="text-3xl md:text-5xl text-[#e6b8a2] mb-1">
+            <div className="backdrop-blur-sm rounded-md p-4 md:p-6   min-w-[70px] md:min-w-[90px]">
+              <div className="text-3xl md:text-5xl text-[#e6b8a2] mb-1 !text-[#6b7c6a] font-bold">
                 {value.toString().padStart(2, '0')}
               </div>
-              <div className="text-xs md:text-sm text-gray-600 uppercase tracking-wider">
+              <div className="text-xs md:text-sm text-gray-600 uppercase tracking-wider !font-cinzel font-bold">
                 {unit === "days" ? "Días" : unit === "hours" ? "Horas" : unit === "minutes" ? "Min" : "Seg"}
               </div>
             </div>
