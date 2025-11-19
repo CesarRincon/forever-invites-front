@@ -7,26 +7,29 @@ import { useEventStore } from "../store/useEventStore";
 export function Dashboard() {
 
   const eventData = useEventStore((state) => state.eventData)
+  console.log("🚀 ~ Dashboard ~ eventData:", eventData)
+  const isDisabled = !eventData || !eventData.coupleName;
+  console.log("🚀 ~ Dashboard ~ isDisabled:", isDisabled)
 
   const stats = [
     {
       icon: Users,
       label: "Total Invitados",
-      value: eventData.totalGuests,
+      value: 1,
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-50"
     },
     {
       icon: CheckCircle2,
       label: "Confirmados",
-      value: eventData.confirmed,
+      value: 2,
       color: "from-green-500 to-green-600",
       bgColor: "bg-green-50"
     },
     {
       icon: Clock,
       label: "Pendientes",
-      value: eventData.pending,
+      value: 3,
       color: "from-amber-500 to-amber-600",
       bgColor: "bg-amber-50"
     },
@@ -87,28 +90,55 @@ export function Dashboard() {
       {/* Event Card */}
       <div className="bg-gradient-to-br from-[#faf3eb] to-[#f5e6d3] rounded-md p-6 md:p-10 mb-8 shadow-lg w-full">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8 w-full">
-          <div className="w-full">
-            <div className="flex items-center gap-3 mb-3 !p-4">
-              <Heart className="w-8 h-8 text-[#e6b8a2] fill-[#e6b8a2]" />
-              <h3>{eventData.coupleName}</h3>
-            </div>
-            <div className="flex flex-col md:flex-row gap-4 text-gray-700 !pl-4 !pb-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-[#e6b8a2]" />
-                <span>15 de Junio, 2025 - 6:00 PM</span>
+          {
+            !isDisabled ?
+              <div className="w-full">
+                <div className="flex items-center gap-3 mb-3 !p-4">
+                  <Heart className="w-8 h-8 text-[#e6b8a2] fill-[#e6b8a2]" />
+                  <h3>{eventData.coupleName}</h3>
+                </div>
+                <div className="flex flex-col md:flex-row gap-4 text-gray-700 !pl-4 !pb-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-[#e6b8a2]" />
+                    <span>15 de Junio, 2025 - 6:00 PM</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-[#e6b8a2]" />
+                    <span>{eventData.venue}</span>
+                  </div>
+                  <Link
+                    href={'/event'}
+                    className="rounded-md hover:shadow-lg transition-all flex items-center absolute top-13 right-13 hover:cursor-pointer"
+                  >
+                    <Settings className="w-5 h-5" />
+                  </Link>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-[#e6b8a2]" />
-                <span>{eventData.venue}</span>
+              :
+              <div className="w-full h-full flex items-center justify-center">
+
+                <div className="bg-gradient-to-br from-[#faf3eb] to-[#f5e6d3] rounded-xl p-10 shadow-md w-full max-w-lg flex flex-col items-center">
+
+                  <Heart className="w-16 h-16 text-[#e6b8a2] fill-[#e6b8a2] mb-4" />
+
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+                    ¡Comencemos tu gran día! 💍
+                  </h2>
+
+                  <p className="text-gray-600 mb-6">
+                    Aún no tienes ningún evento creado.
+                    Crea tu primer evento para empezar a personalizar tu invitación.
+                  </p>
+
+                  <Link
+                    href="/event"
+                    className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#e6b8a2] to-[#d19d86] text-white hover:opacity-90 shadow-md"
+                  >
+                    Crear mi primer evento
+                  </Link>
+                </div>
               </div>
-              <Link
-                href={'/event'}
-                className="rounded-md hover:shadow-lg transition-all flex items-center absolute top-13 right-13 hover:cursor-pointer"
-              >
-                <Settings className="w-5 h-5" />
-              </Link>
-            </div>
-          </div>
+          }
         </div>
       </div>
 
@@ -144,7 +174,7 @@ export function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {quickActions.map((action, index) => (
             <Link
-              href={action?.url ?? '/'}
+              href={isDisabled ? '/dashboard' : action?.url ?? '/'}
               key={index}
               onClick={action.action}
               className="rounded-2xl !p-4 hover:shadow-xl transition-all text-center group flex bg-white items-center flex-col gap-2"

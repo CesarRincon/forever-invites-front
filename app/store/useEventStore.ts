@@ -14,13 +14,8 @@ interface EventData {
     music: string;
     dressCode: string;
     message: string;
+    itinerary: ItineraryItem[];
     coverImage?: string;
-
-    // Stats (opcionales, si los usarás en el panel)
-    totalGuests?: number;
-    confirmed?: number;
-    pending?: number;
-    declined?: number;
 }
 
 interface ItineraryItem {
@@ -28,104 +23,175 @@ interface ItineraryItem {
     event: string;
 }
 
+interface Family {
+    id: string;
+    family_name: string;
+    invitation_link: string;
+}
+
+interface Guest {
+    id: string;
+    name: string;
+    status: string;
+    family_id: string;
+}
+
 interface EventStore {
+    eventId: string | null;
     eventData: EventData;
-    itinerary: ItineraryItem[];
+    families: Family[];
+    guests: Guest[];
+    itinerary: ItineraryItem[],
 
     setEventData: (data: Partial<EventData>) => void;
     setItinerary: (list: ItineraryItem[]) => void;
 
-    saveToSupabase: (userId: string) => Promise<{ success: boolean; error?: string }>;
+    loadEvent: (userId: string) => Promise<void>;
+    saveEvent: (userId: string) => Promise<void>;
 
-    uploadCoverImage: (file: File) => Promise<string | null>;
+    addFamily: (familyName: string) => Promise<string>;
+    addGuest: (familyId: string, name: string) => Promise<void>;
+    updateGuestStatus: (guestId: string, status: string) => Promise<void>;
 }
 
 export const useEventStore = create<EventStore>((set, get) => ({
+    eventId: null,
+
     eventData: {
-        coupleName: "María & Alejandro",
-        date: "2025-06-15",
-        time: "18:00",
-        venue: "Hacienda Los Rosales",
-        address: "Calle Principal 123, Ciudad",
+        coupleName: "",
+        date: "",
+        time: "",
+        venue: "",
+        address: "",
         color: "#e6b8a2",
         template: "romantic-garden",
         music: "",
         dressCode: "Formal",
-        message: "Nos encantaría que nos acompañes en este día tan especial",
-
-        // Stats opcionales
-        totalGuests: 0,
-        confirmed: 0,
-        pending: 0,
-        declined: 0,
+        message: "",
+        itinerary: [],
     },
 
-    itinerary: [
-        { time: "18:00", event: "Ceremonia" },
-        { time: "19:30", event: "Cóctel" },
-        { time: "21:00", event: "Recepción" },
-        { time: "23:00", event: "Fiesta" },
-    ],
+    families: [],
+    guests: [],
+    itinerary: [],
 
     setEventData: (data) =>
-        set((state) => ({
-            eventData: { ...state.eventData, ...data },
-        })),
+        set((state) => ({ eventData: { ...state.eventData, ...data } })),
 
-    setItinerary: (list) => set({ itinerary: list }),
+    setItinerary: (list) =>
+        set((state) => ({ eventData: { ...state.eventData, itinerary: list } })),
 
-    saveToSupabase: async (userId: string) => {
-        try {
-            const { eventData, itinerary } = get();
+    // 🔥 Cargar evento + familias + invitados
+    loadEvent: async (userId: string) => {
+        const { data: event } = await supabase
+            .from("events")
+            .select("*")
+            .eq("user_id", userId)
+            .single();
 
-            const { error } = await supabase.from("events").upsert({
-                user_id: userId,
-                couple_name: eventData.coupleName,
-                date: eventData.date,
-                time: eventData.time,
-                venue: eventData.venue,
-                address: eventData.address,
-                color: eventData.color,
-                template: eventData.template,
-                music: eventData.music,
-                dress_code: eventData.dressCode,
-                message: eventData.message,
-                cover_image: eventData.coverImage,
+        if (!event) return;
 
-                // stats opcionales si las usas
-                total_guests: eventData.totalGuests,
-                confirmed: eventData.confirmed,
-                pending: eventData.pending,
-                declined: eventData.declined,
+        const { data: families } = await supabase
+            .from("families")
+            .select("*")
+            .eq("event_id", event.id);
 
-                itinerary: itinerary, // Si en DB tienes jsonb
-                updated_at: new Date().toISOString(),
-            });
+        const { data: guests } = await supabase
+            .from("guests")
+            .select("*")
+            .eq("event_id", event.id);
 
-            if (error) return { success: false, error: error.message };
-
-            return { success: true };
-        } catch (err: any) {
-            return { success: false, error: err.message };
-        }
+        set({
+            eventId: event.id,
+            eventData: {
+                coupleName: event.couple_name,
+                date: event.date,
+                time: event.time,
+                venue: event.venue,
+                address: event.address,
+                color: event.color,
+                template: event.template,
+                music: event.music,
+                dressCode: event.dress_code,
+                message: event.message,
+                itinerary: event.itinerary || [],
+                coverImage: event.cover_image,
+            },
+            families: families || [],
+            guests: guests || [],
+        });
     },
 
-    uploadCoverImage: async (file: File) => {
-        const fileName = `${crypto.randomUUID()}.jpg`;
+    // 🔥 Guardar evento (crea o actualiza)
+    saveEvent: async (userId: string) => {
+        const { eventId, eventData } = get();
 
-        const { data, error } = await supabase.storage
-            .from("covers")
-            .upload(fileName, file);
+        if (!eventId) {
+            const { data, error } = await supabase.rpc("create_event", {
+                p_user_id: userId,
+                p_data: eventData,
+                p_itinerary: eventData.itinerary,
+            });
 
-        if (error) return null;
+            if (data) set({ eventId: data });
+            return;
+        }
 
-        const publicUrl =
-            supabase.storage.from("covers").getPublicUrl(fileName).data.publicUrl;
+        await supabase.rpc("update_event", {
+            p_event_id: eventId,
+            p_data: eventData,
+            p_itinerary: eventData.itinerary,
+        });
+    },
 
-        set((state) => ({
-            eventData: { ...state.eventData, coverImage: publicUrl },
-        }));
+    // 🔥 Agregar familia
+    addFamily: async (familyName: string) => {
+        const { eventId, families } = get();
 
-        return publicUrl;
+        const { data } = await supabase.rpc("create_family", {
+            p_event_id: eventId,
+            p_family_name: familyName,
+        });
+
+        set({
+            families: [...families, { id: data, family_name: familyName, invitation_link: "" }],
+        });
+
+        return data;
+    },
+
+    // 🔥 Agregar invitado
+    addGuest: async (familyId: string, name: string) => {
+        const { eventId, guests } = get();
+
+        const { data } = await supabase.rpc("add_guest", {
+            p_event_id: eventId,
+            p_family_id: familyId,
+            p_name: name,
+        });
+
+        set({
+            guests: [...guests, { id: data, name, status: "pending", family_id: familyId }],
+        });
+    },
+
+    // 🔥 Actualizar estado Invitado + stats
+    updateGuestStatus: async (guestId: string, status: string) => {
+        const { guests, eventId } = get();
+
+        await supabase.rpc("update_guest_status", {
+            p_guest_id: guestId,
+            p_status: status,
+        });
+
+        await supabase.rpc("recalc_event_stats", {
+            p_event_id: eventId,
+        });
+
+        set({
+            guests: guests.map((g) =>
+                g.id === guestId ? { ...g, status } : g
+            ),
+        });
     },
 }));

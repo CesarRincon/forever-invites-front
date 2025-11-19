@@ -5,6 +5,8 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { LoginModal } from "./LoginModal";
+import { AuthModal } from "./AuthModal";
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -87,15 +89,10 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center !mt-2">
-              <Link
-                href={'/dashboard'}
-                className="px-8 py-4 bg-gradient-to-r from-[#e6b8a2] to-[#d19d86] text-white rounded-md hover:shadow-2xl transition-all duration-300 hover:scale-105 text-lg"
-              >
-                Crear mi invitación gratis
-              </Link>
-              <button className="!px-8 !py-4 bg-white/10 backdrop-blur-md text-white rounded-md hover:bg-white/20 transition-all border border-white/30">
+              <AuthModal />
+              {/* <button className="!px-8 !py-4 bg-white/10 backdrop-blur-md text-white rounded-md hover:bg-white/20 transition-all border border-white/30">
                 Ver ejemplos
-              </button>
+              </button> */}
             </div>
 
             {/* Stats */}

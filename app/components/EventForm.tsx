@@ -10,7 +10,7 @@ import { useEventStore } from "../store/useEventStore";
 export function EventForm() {
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { eventData, itinerary, setEventData, setItinerary, saveToSupabase } =
+  const { eventData, itinerary, setEventData, setItinerary, saveEvent } =
     useEventStore();
 
 

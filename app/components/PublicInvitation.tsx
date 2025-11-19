@@ -28,16 +28,22 @@ interface Guest {
   status: "confirmed" | "pending" | "declined";
 }
 
-export function PublicInvitation() {
+export function PublicInvitation({
+  // eventData,
+  itinerary,
+  family,
+  // guests
+}: any) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   useReveal(); // ← ACTIVA ANIMACIONES
 
-  const [guests, setGuests] = useState<Guest[]>([
+  const [guestsState, setGuestsState] = useState<Guest[]>([
     { id: "1", name: "Roberto González", status: "pending" },
     { id: "2", name: "Ana González", status: "pending" },
     { id: "3", name: "Luis González", status: "pending" }
   ]);
+  // const [guestsState, setGuestsState] = useState<Guest[]>(guests);
 
   const eventData = {
     coupleName: "Alex & Lina",
@@ -63,14 +69,34 @@ export function PublicInvitation() {
     ]
   };
 
-  const handleConfirmation = (
+  // const handleConfirmation = (
+  //   guestId: string,
+  //   status: "confirmed" | "declined" | "pending"
+  // ) => {
+  //   setGuestsState(
+  //     guestsState.map((g) => (g.id === guestId ? { ...g, status } : g))
+  //   );
+  // };
+
+  const handleConfirmation = async (
     guestId: string,
     status: "confirmed" | "declined" | "pending"
   ) => {
-    setGuests(
-      guests.map((g) => (g.id === guestId ? { ...g, status } : g))
+    // 1. Update UI instantly
+    setGuestsState(prev =>
+      prev.map(g => g.id === guestId ? { ...g, status } : g)
     );
-  };
+
+    // 2. Update DB
+    await fetch("/api/rsvp", {
+      method: "POST",
+      body: JSON.stringify({
+        guestId,
+        status,
+        familyId: family.id,   // <- necesario
+      }),
+    });
+  }
 
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     eventData.address
@@ -160,49 +186,60 @@ export function PublicInvitation() {
       <div className="relative z-10">
 
         {/* HERO */}
-        <section className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+        <section className="relative h-screen flex items-center justify-center overflow-hidden bg-[#f5f1ed]">
 
-          {/* Background image + natural gradient */}
-          <div className="absolute inset-0">
-            <ImageWithFallback
-              src="https://i.pinimg.com/1200x/db/9a/6a/db9a6a17d13b40539714e9eb513f81ae.jpg"
-              alt="Wedding"
-              className="w-full h-full object-cover"
-            />
+          {/* Contenedor de las 3 columnas más pequeñas */}
+          <div className="absolute top-0 inset-0 flex justify-center gap-2 px-6 items-center">
 
-            <div className="absolute inset-0 
-                      bg-gradient-to-b 
-                      from-black/40 via-transparent 
-                      to-[#f5f1ed]/90" />
-          </div>
-
-          {/* Content */}
-          <div className="z-10 text-center px-4 max-w-4xl mx-auto reveal absolute bottom-20">
-
-            <img
-              src="/decorative-icon.png"
-              width={150}
-              height={80}
-              className="mx-auto my-4"
-              style={{ filter: "invert(0) brightness(0)" }}
-            />
-
-            {/* Nombres */}
-            <h1 className="text-white text-7xl drop-shadow-2xl !font-alex reveal">
-              {eventData.groom}
-            </h1>
-
-            <div className="!text-black text-4xl opacity-90 reveal reveal-delay-2">
-              &
+            {/* Columna izquierda (misma altura que la derecha) */}
+            <div
+              className="relative w-1/3 h-[60vh] overflow-hidden rounded-md -translate-y-[140px] reveal"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800"
+                className="w-full h-full object-cover"
+                style={{ objectPosition: "left center" }}
+              />
             </div>
 
-            <h1 className="text-white text-7xl drop-shadow-2xl !font-alex reveal reveal-delay-3">
+            {/* Columna central (más baja, como en el video) */}
+            <div
+              className="relative w-1/3 h-[60vh] overflow-hidden rounded-md -translate-y-[90px] reveal"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800"
+                className="w-full h-full object-cover"
+                style={{ objectPosition: "center center" }}
+              />
+            </div>
+
+            {/* Columna derecha */}
+            <div
+              className="relative w-1/3 h-[60vh] overflow-hidden rounded-md -translate-y-[140px] reveal"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800"
+                className="w-full h-full object-cover"
+                style={{ objectPosition: "right center" }}
+              />
+            </div>
+          </div>
+
+          {/* Sombra suave encima */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-transparent" />
+
+          {/* Contenido del hero (nombres, fecha, etc.) */}
+          <div className="absolute bottom-16 z-10 text-center px-6">
+            <h1 className="text-black text-6xl md:text-7xl font-alex italic drop-shadow-xl mb-2">
               {eventData.bride}
             </h1>
-
-            {/* Fecha */}
-            <p className="text-3xl text-black font-bold !font-alex mt-6 reveal reveal-delay-4">
-              5 de Marzo, 2026
+            <p className="text-black !text-5xl font-alex drop-shadow-xl">&</p>
+            <h1 className="text-black text-6xl md:text-7xl font-alex italic drop-shadow-xl">
+              {eventData.groom}
+            </h1>
+            <p className="mt-1 text-black font-cinzel tracking-[0.3em] text-xl drop-shadow-xl">
+              05/03/2026
+              {/* {eventData.date} */}
             </p>
           </div>
         </section>
@@ -325,10 +362,6 @@ export function PublicInvitation() {
           </div>
         </section>
 
-
-        {/* GALERÍA DE MOMENTOS */}
-
-
         {/* CAROUSEL DE IMÁGENES ROMÁNTICO */}
         <section className="py-5 sm:py-20 px-4 bg-[#f5f1ed]">
           <div className="max-w-6xl mx-auto">
@@ -349,7 +382,6 @@ export function PublicInvitation() {
             </div>
           </div>
         </section>
-
 
         {/* ITINERARY */}
         <section className="py-5 sm:py-16 px-4 bg-gradient-to-b from-[#f5f1ed] to-[#e8e4df]">
@@ -442,7 +474,6 @@ export function PublicInvitation() {
           </div>
         </section>
 
-
         {/* GIFTS */}
         <section className="py-16 px-4 bg-gradient-to-b from-white to-[#faf3eb]">
           <div className="max-w-4xl mx-auto">
@@ -483,7 +514,7 @@ export function PublicInvitation() {
 
             <div className="bg-white rounded-3xl p-10 shadow-xl reveal border border-[#8b9e8a]">
               <div className="space-y-6">
-                {guests.map((guest) => (
+                {guestsState.map((guest) => (
                   <div key={guest.id} className="bg-[#efe9dd] p-6 rounded-2xl reveal border border-[#8b9e8a]">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
 
