@@ -1,11 +1,13 @@
 "use client"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LandingPage } from "./components/LandingPage";
 import { EventForm } from "./components/EventForm";
 import { GuestManagement } from "./components/GuestManagement";
 import { PublicInvitation } from "./components/PublicInvitation";
 import { Sidebar } from "./components/Sidebar";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "./store/useAuthStore";
+import { useEventStore } from "./store/useEventStore";
 
 type Page = "landing" | "dashboard" | "event" | "guests" | "templates" | "settings" | "preview";
 
@@ -13,6 +15,17 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("landing");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter()
+  const fetchUser = useAuthStore((state) => state.fetchUser)
+  const user = useAuthStore((state) => state.user)
+  const loadEvent = useEventStore((state) => state.loadEvent)
+
+  useEffect(() => {
+    fetchUser()
+  }, [])
+
+  useEffect(() => {
+    if (user?.id) loadEvent(user?.id)
+  }, [user?.id])
 
   const handleGetStarted = () => {
     setIsLoggedIn(true);

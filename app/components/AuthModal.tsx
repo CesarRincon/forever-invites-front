@@ -6,8 +6,8 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
-import { supabase } from "../lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { supabaseBrowser } from "../lib/supabaseBrowserClient";
 
 export const AuthModal = () => {
     const [open, setOpen] = useState(false);
@@ -22,6 +22,7 @@ export const AuthModal = () => {
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
+        const supabase = supabaseBrowser();
 
         const formData = new FormData(e.target);
         const name = formData.get("name") as string;
@@ -35,14 +36,13 @@ export const AuthModal = () => {
                 password,
             });
 
+            console.log("🚀 ~ handleSubmit ~ error:", error)
             if (error) {
                 console.error("Error login:", error.message);
                 return;
             }
-
-            setUser(data.user);
             setOpen(false);
-            console.log("Usuario logueado:", data.user);
+            console.log("Usuario logueado: ", data.user.user_metadata);
             router.push('/dashboard')
         } else {
             // REGISTRO
@@ -61,7 +61,6 @@ export const AuthModal = () => {
                 return;
             }
 
-            setUser(data.user);
             setOpen(false);
             router.push('/dashboard')
             console.log("Usuario registrado:", data.user);

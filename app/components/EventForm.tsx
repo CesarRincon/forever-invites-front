@@ -1,18 +1,42 @@
 'use client'
 import { Calendar, MapPin, Palette, Music, Shirt, Upload, Save, Image as ImageIcon, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { useEventStore } from "../store/useEventStore";
+import { EventData, useEventStore } from "../store/useEventStore";
+import SimpleMDE from "react-simplemde-editor";
+import "easymde/dist/easymde.min.css";
+import { useAuthStore } from "../store/useAuthStore";
+
+const options = {
+  spellChecker: false,
+  placeholder: "Detalles sobre la vestimenta…",
+  autofocus: false,
+  status: false,
+  toolbar: [
+    "bold",
+    "italic",
+    "heading",
+    "|",
+    "unordered-list",
+    "ordered-list",
+    "|",
+    "preview"
+  ]
+};
 
 export function EventForm() {
-  const [coverImage, setCoverImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { eventData, itinerary, setEventData, setItinerary, saveEvent } =
-    useEventStore();
+  const heroInputRef = useRef<HTMLInputElement>(null);
+  const coupleInputRef = useRef<HTMLInputElement>(null);
+  const venueInputRef = useRef<HTMLInputElement>(null);
+  const highlightsInputRef = useRef<HTMLInputElement>(null);
+  const memoizedOptions = useMemo(() => options, []);
+  const user = useAuthStore((state) => state.user)
 
+  const { eventData, setEventData, saveEvent, loadEvent } = useEventStore();
 
   const templates = [
     { id: "romantic-garden", name: "Jardín Romántico", color: "#f8e8e8" },
@@ -30,55 +54,197 @@ export function EventForm() {
     { name: "Lavender", value: "#e6e6fa" }
   ];
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCoverImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  // ===== Handlers =====
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, field: keyof EventData) => {
+    const files = event.target.files;
+    if (!files) return;
+    const urls = Array.from(files).map(f => URL.createObjectURL(f));
+    setEventData({ ...eventData, [field]: [...(eventData[field] || []), ...urls] });
+  };
+
+  const removeImage = (field: keyof EventData, index: number) => {
+    const newArray = [...(eventData[field] || [])];
+    newArray.splice(index, 1);
+    setEventData({ ...eventData, [field]: newArray });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      await saveEvent(user.id); // Aquí usas tu store para enviar a la DB
+      alert("Evento guardado correctamente 🎉");
+    } catch (err) {
+      console.error(err);
+      alert("Ocurrió un error al guardar el evento");
     }
   };
 
-  const removeImage = () => {
-    setCoverImage(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const addGiftSuggestion = () => {
+    setEventData({ ...eventData, giftSuggestions: [...(eventData.giftSuggestions || []), { name: "" }] });
   };
 
+  const updateGiftSuggestion = (index: number, value: string) => {
+    const newGifts = [...(eventData.giftSuggestions || [])];
+    newGifts[index].name = value;
+    setEventData({ ...eventData, giftSuggestions: newGifts });
+  };
 
+  const removeGiftSuggestion = (index: number) => {
+    setEventData({ ...eventData, giftSuggestions: eventData.giftSuggestions.filter((_, i) => i !== index) });
+  };
+
+  const [loading, setLoading] = useState(true);
+
+  const componentDidMount = async () => {
+    if (user?.id) {
+      await loadEvent(user.id);
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    componentDidMount()
+  }, [user?.id]);
+
+
+  const renderGallery = (
+    title: string,
+    images: string[],
+    key: keyof EventData,
+    inputRef: any
+  ) => (
+    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
+      <h4 className="mb-6 flex items-center gap-2">
+        <ImageIcon className="w-5 h-5 text-[#e6b8a2]" />
+        {title} (máx. 3 imágenes)
+      </h4>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {images.map((img, index) => (
+          <div key={index} className="relative rounded-2xl overflow-hidden">
+            <img
+              src={img}
+              alt={`${title} ${index + 1}`}
+              className="w-full h-48 object-cover rounded-2xl"
+            />
+            <button
+              onClick={() => {
+                const newImages = [...images];
+                newImages.splice(index, 1);
+                setEventData({ ...eventData, [key]: newImages });
+              }}
+              className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-all shadow-lg"
+            >
+              <X className="w-2 h-2" />
+            </button>
+          </div>
+        ))}
+
+        {images.length < 3 && (
+          <div
+            onClick={() => inputRef.current?.click()}
+            className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-[#e6b8a2] hover:bg-[#faf3eb] transition-all cursor-pointer"
+          >
+            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 mb-2">Subir imagen</p>
+            <p className="text-sm text-gray-500">Recomendado: 1920x1080px, máximo 5MB</p>
+            <input
+              type="file"
+              accept="image/*"
+              ref={inputRef}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  setEventData(prev => ({
+                    ...prev,
+                    [key]: [...(prev[key] || []), reader.result as string],
+                  }));
+                };
+                reader.readAsDataURL(file);
+              }}
+              className="hidden"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="p-4 md:p-8 w-full mx-auto animate-pulse space-y-6">
+        {/* Sección */}
+        <div className="bg-white rounded-md p-6 shadow-lg space-y-4">
+          <div className="h-6 w-48 bg-gray-200 rounded"></div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+
+            <div className="col-span-2 h-10 bg-gray-200 rounded"></div>
+            <div className="col-span-2 h-20 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+
+        {/* Otra sección */}
+        <div className="bg-white rounded-md p-6 shadow-lg space-y-4">
+          <div className="h-6 w-56 bg-gray-200 rounded"></div>
+          <div className="h-40 bg-gray-200 rounded"></div>
+        </div>
+
+        {/* Galería */}
+        <div className="bg-white rounded-md p-6 shadow-lg">
+          <div className="h-6 w-40 bg-gray-200 rounded mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="h-48 bg-gray-200 rounded-2xl"></div>
+            <div className="h-48 bg-gray-200 rounded-2xl"></div>
+            <div className="h-48 bg-gray-200 rounded-2xl"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ===== Render =====
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <h2 className="mb-2">Configuración del evento</h2>
-        <p className="text-gray-600">
-          Personaliza todos los detalles de tu invitación
-        </p>
+        <p className="text-gray-600">Personaliza todos los detalles de tu invitación</p>
       </div>
 
       <div className="space-y-6">
-        {/* Basic Info Card */}
+        {/* Información básica */}
         <div className="bg-white rounded-md p-6 md:p-8 shadow-lg">
           <h4 className="mb-6 flex items-center gap-2">
             <Calendar className="w-5 h-5 text-[#e6b8a2]" />
             Información básica
           </h4>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="coupleName">Nombres de los novios</Label>
+              <Label htmlFor="bride">Nombre de la novia</Label>
               <Input
-                id="coupleName"
-                value={eventData.coupleName}
-                onChange={(e) => setEventData({ coupleName: e.target.value })}
-                placeholder="María & Alejandro"
+                id="bride"
+                value={eventData.bride}
+                onChange={(e) => setEventData({ ...eventData, bride: e.target.value })}
+                placeholder="María"
                 className="mt-2"
               />
             </div>
-
+            <div>
+              <Label htmlFor="groom">Nombre del novio</Label>
+              <Input
+                id="groom"
+                value={eventData.groom}
+                onChange={(e) => setEventData({ ...eventData, groom: e.target.value })}
+                placeholder="Alejandro"
+                className="mt-2"
+              />
+            </div>
             <div>
               <Label htmlFor="date">Fecha del evento</Label>
               <Input
@@ -89,7 +255,6 @@ export function EventForm() {
                 className="mt-2"
               />
             </div>
-
             <div>
               <Label htmlFor="time">Hora</Label>
               <Input
@@ -100,7 +265,6 @@ export function EventForm() {
                 className="mt-2"
               />
             </div>
-
             <div>
               <Label htmlFor="venue">Lugar del evento</Label>
               <Input
@@ -111,7 +275,6 @@ export function EventForm() {
                 className="mt-2"
               />
             </div>
-
             <div className="md:col-span-2">
               <Label htmlFor="address">Dirección completa</Label>
               <Input
@@ -122,7 +285,6 @@ export function EventForm() {
                 className="mt-2"
               />
             </div>
-
             <div className="md:col-span-2">
               <Label htmlFor="message">Mensaje de bienvenida</Label>
               <Textarea
@@ -134,11 +296,21 @@ export function EventForm() {
                 rows={3}
               />
             </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="mapLink">Link de Google Maps (opcional)</Label>
+              <Input
+                id="mapLink"
+                value={eventData.mapLink || ""}
+                onChange={(e) => setEventData({ ...eventData, mapLink: e.target.value })}
+                placeholder="https://goo.gl/maps/ejemplo"
+                className="mt-2"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Design Card */}
-        <div className="bg-white rounded-md p-6 md:p-8 shadow-lg">
+        {/* Diseño y estilo */}
+        {/* <div className="bg-white rounded-md p-6 md:p-8 shadow-lg">
           <h4 className="mb-6 flex items-center gap-2">
             <Palette className="w-5 h-5 text-[#e6b8a2]" />
             Diseño y estilo
@@ -174,7 +346,7 @@ export function EventForm() {
                   <button
                     key={color.value}
                     onClick={() => setEventData({ ...eventData, color: color.value })}
-                    className={`group relative flex flex-col items-center gap-2`}
+                    className="group relative flex flex-col items-center gap-2"
                   >
                     <div
                       className={`w-14 h-14 rounded-full border-4 transition-all shadow-md ${eventData.color === color.value
@@ -191,23 +363,23 @@ export function EventForm() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
-        {/* Additional Details Card */}
+        {/* Detalles adicionales */}
         <div className="bg-white rounded-md p-6 md:p-8 shadow-lg">
           <h4 className="mb-6 flex items-center gap-2">
             <Shirt className="w-5 h-5 text-[#e6b8a2]" />
             Detalles adicionales
           </h4>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
             <div>
               <Label htmlFor="dressCode">Código de vestimenta</Label>
               <Select value={eventData.dressCode} onValueChange={(value) => setEventData({ ...eventData, dressCode: value })}>
                 <SelectTrigger className="mt-2">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="Formal">Formal</SelectItem>
                   <SelectItem value="Semi-formal">Semi-formal</SelectItem>
                   <SelectItem value="Casual elegante">Casual elegante</SelectItem>
@@ -215,6 +387,17 @@ export function EventForm() {
                   <SelectItem value="Black tie">Black tie</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="md:col-span-2">
+              <Label htmlFor="dressCodeDescription">Descripción del dress code</Label>
+              <SimpleMDE
+                value={eventData?.dressCodeDescription}
+                onChange={(value) =>
+                  setEventData({ ...eventData, dressCodeDescription: value })
+                }
+                options={memoizedOptions}
+              />
             </div>
 
             <div>
@@ -230,7 +413,6 @@ export function EventForm() {
           </div>
         </div>
 
-        {/* Itinerary Card */}
         <div className="bg-white rounded-md p-6 md:p-8 shadow-lg">
           <h4 className="mb-6 flex items-center gap-2">
             <Calendar className="w-5 h-5 text-[#e6b8a2]" />
@@ -238,38 +420,57 @@ export function EventForm() {
           </h4>
 
           <div className="space-y-4">
-            {itinerary.map((item, index) => (
+            {eventData.itinerary.map((item, index) => (
               <div key={index} className="flex gap-4 items-center p-4 bg-[#faf3eb] rounded-md">
+
+                {/* Hora */}
                 <Input
                   type="time"
                   value={item.time}
                   onChange={(e) => {
-                    const newItinerary = [...itinerary];
-                    newItinerary[index].time = e.target.value;
-                    setItinerary(newItinerary);
+                    const updated = [...eventData.itinerary];
+                    updated[index].time = e.target.value;
+                    setEventData({ ...eventData, itinerary: updated });
                   }}
                   className="w-32"
                 />
+
+                {/* Evento */}
                 <Input
                   value={item.event}
                   onChange={(e) => {
-                    const newItinerary = [...itinerary];
-                    newItinerary[index].event = e.target.value;
-                    setItinerary(newItinerary);
+                    const updated = [...eventData.itinerary];
+                    updated[index].event = e.target.value;
+                    setEventData({ ...eventData, itinerary: updated });
                   }}
                   placeholder="Nombre del evento"
                   className="flex-1"
                 />
+
+                {/* Eliminar */}
                 <button
-                  onClick={() => setItinerary(itinerary.filter((_, i) => i !== index))}
+                  onClick={() =>
+                    setEventData({
+                      ...eventData,
+                      itinerary: eventData.itinerary.filter((_, i) => i !== index),
+                    })
+                  }
                   className="text-red-500 hover:text-red-700 px-3"
                 >
                   Eliminar
                 </button>
+
               </div>
             ))}
+
+            {/* Agregar evento */}
             <button
-              onClick={() => setItinerary([...itinerary, { time: "00:00", event: "" }])}
+              onClick={() =>
+                setEventData({
+                  ...eventData,
+                  itinerary: [...eventData.itinerary, { time: "00:00", event: "" }],
+                })
+              }
               className="w-full py-3 border-2 border-dashed border-gray-300 rounded-md hover:border-[#e6b8a2] hover:bg-[#faf3eb] transition-all"
             >
               + Agregar evento
@@ -277,73 +478,114 @@ export function EventForm() {
           </div>
         </div>
 
-        {/* Cover Image Card */}
+
+        {/* Galerías de imágenes */}
         <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
           <h4 className="mb-6 flex items-center gap-2">
             <ImageIcon className="w-5 h-5 text-[#e6b8a2]" />
-            Imagen de portada
+            Hero Images (3 obligatorias)
           </h4>
 
-          {!coverImage ? (
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-[#e6b8a2] hover:bg-[#faf3eb] transition-all cursor-pointer"
-            >
-              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-2">Haz clic para subir o arrastra una imagen</p>
-              <p className="text-sm text-gray-500">Recomendado: 1920x1080px, máximo 5MB</p>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-            </div>
-          ) : (
-            <div className="relative rounded-2xl overflow-hidden">
-              <img
-                src={coverImage}
-                alt="Cover preview"
-                className="w-full h-64 object-cover rounded-2xl"
-              />
-              <button
-                onClick={removeImage}
-                className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-all shadow-lg"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {eventData.heroImages.map((img, index) => (
+              <div key={index} className="relative rounded-2xl overflow-hidden">
+                <img
+                  src={img}
+                  alt={`Hero ${index + 1}`}
+                  className="w-full h-48 object-cover rounded-2xl"
+                />
+                <button
+                  onClick={() => {
+                    const newImages = [...eventData.heroImages];
+                    newImages.splice(index, 1);
+                    setEventData({ ...eventData, heroImages: newImages });
+                  }}
+                  className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-all shadow-lg"
+                >
+                  <X className="w-2 h-2" />
+                </button>
+              </div>
+            ))}
+
+            {eventData.heroImages.length < 3 && (
+              <div
+                onClick={() => heroInputRef.current?.click()}
+                className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-[#e6b8a2] hover:bg-[#faf3eb] transition-all cursor-pointer"
               >
-                <X className="w-2 h-2" />
-              </button>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-4 right-4 bg-white text-gray-700 px-4 py-2 rounded-md hover:bg-gray-100 transition-all shadow-lg flex items-center gap-2"
-              >
-                <Upload className="w-4 h-4" />
-                Cambiar imagen
-              </button>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-            </div>
-          )}
+                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 mb-2">Subir imagen</p>
+                <p className="text-sm text-gray-500">Recomendado: 1920x1080px, máximo 5MB</p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={heroInputRef}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setEventData({
+                          heroImages: [...eventData.heroImages, reader.result as string],
+                        });
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="hidden"
+                />
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Action Buttons */}
+        {renderGallery("Galería Novios", eventData.galleryCouple, "galleryCouple", coupleInputRef)}
+        {renderGallery("Galería Lugar", eventData.galleryVenue, "galleryVenue", venueInputRef)}
+        {renderGallery("Galería Momentos", eventData.galleryHighlights, "galleryHighlights", highlightsInputRef)}
+
+
+        {/* Gift Suggestions */}
+        <div className="bg-white rounded-md p-6 md:p-8 shadow-lg">
+          <h4 className="mb-6 flex items-center gap-2">🎁 Sugerencias de regalos</h4>
+          <div className="space-y-2">
+            {(eventData.giftSuggestions || []).map((gift, idx) => (
+              <div key={idx} className="flex gap-2 items-center">
+                <Input
+                  value={gift.name}
+                  onChange={(e) => updateGiftSuggestion(idx, e.target.value)}
+                  placeholder="Nombre del regalo"
+                  className="flex-1"
+                />
+                <button
+                  onClick={() => removeGiftSuggestion(idx)}
+                  className="text-red-500"
+                >
+                  Eliminar
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={addGiftSuggestion}
+              className="mt-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-md hover:border-[#e6b8a2]"
+            >
+              + Agregar regalo
+            </button>
+          </div>
+        </div>
+
+        {/* Botones de acción */}
         <div className="flex flex-col sm:flex-row gap-4 sticky bottom-4 bg-white/80 backdrop-blur-lg rounded-md p-4 shadow-2xl">
           <button className="flex-1 px-6 py-4 border-2 border-gray-300 rounded-md hover:bg-gray-50 transition-all">
             Cancelar
           </button>
           <button
-
-            className="flex-1 px-6 py-4 bg-gradient-to-r from-[#e6b8a2] to-[#d19d86] text-white rounded-md hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center gap-2">
+            onClick={handleSubmit}
+            className="flex-1 px-6 py-4 bg-gradient-to-r from-[#e6b8a2] to-[#d19d86] text-white rounded-md hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center gap-2"
+          >
             <Save className="w-5 h-5" />
             Guardar cambios
           </button>
         </div>
       </div>
-    </div >
+    </div>
   );
 }

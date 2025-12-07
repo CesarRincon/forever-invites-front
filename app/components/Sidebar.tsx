@@ -13,11 +13,13 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useEventStore } from "../store/useEventStore";
 
 
 export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const EventData = useEventStore((state) => state.eventData)
 
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -84,17 +86,20 @@ export function Sidebar() {
           </div>
 
           {/* User Info */}
-          <div className="bg-gradient-to-br from-[#faf3eb] to-[#f5e6d3] rounded-md !p-4 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#e6b8a2] to-[#d19d86] rounded-full flex items-center justify-center text-white">
-                MA
-              </div>
-              <div>
-                <div className="text-sm text-gray-800">María & Alejandro</div>
-                <div className="text-xs text-gray-600">15 Junio, 2025</div>
+          {
+            EventData.bride &&
+            <div className="bg-gradient-to-br from-[#faf3eb] to-[#f5e6d3] rounded-md !p-4 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#e6b8a2] to-[#d19d86] rounded-full flex items-center justify-center text-white">
+                  {EventData?.groom[0]}{EventData?.bride[0]}
+                </div>
+                <div>
+                  <div className="text-sm text-gray-800">{EventData?.groom} & {EventData?.bride}</div>
+                  <div className="text-xs text-gray-600">{EventData?.date}</div>
+                </div>
               </div>
             </div>
-          </div>
+          }
 
           {/* Menu Items */}
           <nav className="flex-1 space-y-2 flex flex-col gap-2 !mt-4 !mx-2">

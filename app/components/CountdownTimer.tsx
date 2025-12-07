@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 interface CountdownTimerProps {
   targetDate: Date | string;
+  targetTime: string;
   variant?: "default" | "elegant";
 }
 
@@ -12,24 +13,47 @@ interface TimeLeft {
   seconds: number;
 }
 
-export function CountdownTimer({ targetDate, variant = "default" }: CountdownTimerProps) {
+export function CountdownTimer({ targetDate, targetTime, variant = "default" }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: 0,
     hours: 0,
     minutes: 0,
     seconds: 0,
   });
+  const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const difference = +new Date(targetDate) - +new Date();
+      // Crear la fecha objetivo completa
+      let targetDateTime: Date;
+
+      if (targetTime) {
+        const [year, month, day] = targetDate.toString().split("-").map(Number);
+        const [hours, minutes] = targetTime.split(":").map(Number);
+
+        targetDateTime = new Date(year, month - 1, day, hours, minutes, 0, 0);
+      } else {
+        targetDateTime = new Date(targetDate);
+      }
+
+
+      const difference = +targetDateTime - +new Date();
 
       if (difference > 0) {
+        setIsExpired(false);
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
           minutes: Math.floor((difference / 1000 / 60) % 60),
           seconds: Math.floor((difference / 1000) % 60),
+        });
+      } else {
+        setIsExpired(true);
+        setTimeLeft({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
         });
       }
     };
@@ -38,7 +62,7 @@ export function CountdownTimer({ targetDate, variant = "default" }: CountdownTim
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, [targetDate]);
+  }, [targetDate, targetTime]);
 
   if (variant === "elegant") {
     return (

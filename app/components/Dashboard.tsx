@@ -3,13 +3,18 @@ import { Calendar, Users, CheckCircle2, XCircle, Heart, Clock, Eye, Link2, Setti
 import { CountdownTimer } from "./CountdownTimer";
 import Link from "next/link";
 import { useEventStore } from "../store/useEventStore";
+import { useAuthStore } from "../store/useAuthStore";
+import { useEffect, useState } from "react";
 
 export function Dashboard() {
 
-  const eventData = useEventStore((state) => state.eventData)
-  console.log("🚀 ~ Dashboard ~ eventData:", eventData)
-  const isDisabled = !eventData || !eventData.coupleName;
+  const user = useAuthStore((state) => state.user)
+  const { eventData, setEventData, saveEvent, loadEvent } = useEventStore();
+  console.log("🚀 ~ Dashboard ~ eventData:", eventData, user)
+  const isDisabled = !eventData || !eventData.groom;
   console.log("🚀 ~ Dashboard ~ isDisabled:", isDisabled)
+  const [loading, setLoading] = useState(true)
+
 
   const stats = [
     {
@@ -47,14 +52,14 @@ export function Dashboard() {
       icon: Calendar,
       title: "Editar Evento",
       description: "Actualiza detalles de tu boda",
-      action: () => { },
+      url: '/event',
       color: "from-[#e6b8a2] to-[#d19d86]"
     },
     {
       icon: Users,
       title: "Gestionar Invitados",
       description: "Añade o edita invitados",
-      action: () => { },
+      url: '/guests',
       color: "from-purple-500 to-purple-600"
     },
     {
@@ -63,16 +68,6 @@ export function Dashboard() {
       description: "Ve cómo se ve tu invitación",
       url: '/preview',
       color: "from-blue-500 to-blue-600"
-    },
-    {
-      icon: Link2,
-      title: "Copiar enlace",
-      description: "Comparte tu invitación",
-      action: () => {
-        navigator.clipboard.writeText("https://foreverinvites.com/i/maria-alejandro");
-        alert("Enlace copiado al portapapeles");
-      },
-      color: "from-green-500 to-green-600"
     }
   ];
 
@@ -85,6 +80,17 @@ export function Dashboard() {
     { name: "Familia Rodríguez", action: "confirmó asistencia", time: "Hace 2 días", status: "confirmed" },
   ];
 
+  const componentDidMount = async () => {
+    if (user?.id) {
+      await loadEvent(user.id);
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    componentDidMount()
+  }, [user?.id])
+
   return (
     <div className="p-8 md:p-10 w-full mx-auto transition-all flex flex-col items-center gap-4">
       {/* Event Card */}
@@ -95,16 +101,16 @@ export function Dashboard() {
               <div className="w-full">
                 <div className="flex items-center gap-3 mb-3 !p-4">
                   <Heart className="w-8 h-8 text-[#e6b8a2] fill-[#e6b8a2]" />
-                  <h3>{eventData.coupleName}</h3>
+                  <h3>{eventData.groom} & {eventData.bride}</h3>
                 </div>
                 <div className="flex flex-col md:flex-row gap-4 text-gray-700 !pl-4 !pb-4">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-[#e6b8a2]" />
-                    <span>15 de Junio, 2025 - 6:00 PM</span>
+                    <span>{eventData.date}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-[#e6b8a2]" />
-                    <span>{eventData.venue}</span>
+                    <span>{eventData.groom} & {eventData.bride}</span>
                   </div>
                   <Link
                     href={'/event'}
@@ -145,7 +151,7 @@ export function Dashboard() {
       {/* Countdown */}
       <div className="w-full mb-4">
         <p className="text-center text-gray-700 mb-4">Faltan</p>
-        <CountdownTimer targetDate={eventData.date} variant="elegant" />
+        <CountdownTimer targetDate={eventData.date} targetTime={eventData.time} variant="elegant" />
       </div>
 
       {/* Stats Grid */}

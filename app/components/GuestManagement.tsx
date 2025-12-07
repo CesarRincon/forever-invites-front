@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Label } from "./ui/label";
+import { useEventStore } from "../store/useEventStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 interface Guest {
   id: string;
@@ -24,48 +26,24 @@ export function GuestManagement() {
   const [isAddFamilyOpen, setIsAddFamilyOpen] = useState(false);
   const [newFamilyName, setNewFamilyName] = useState("");
   const [newGuests, setNewGuests] = useState<string[]>([""]);
+  const families = useEventStore((state) => state.families)
+  const guests = useEventStore((state) => state.guests)
+  const user = useAuthStore((state) => state.user)
+  console.log("🚀 ~ GuestManagement ~ families:", families, newGuests)
 
-  const [families, setFamilies] = useState<Family[]>([
-    {
-      id: "1",
-      name: "Familia González",
-      guests: [
-        { id: "1-1", name: "Roberto González", status: "confirmed" },
-        { id: "1-2", name: "Ana González", status: "confirmed" },
-        { id: "1-3", name: "Luis González", status: "confirmed" }
-      ],
-      invitationLink: "https://foreverinvites.com/i/maria-alejandro/gonzalez"
-    },
-    {
-      id: "2",
-      name: "Familia Martínez",
-      guests: [
-        { id: "2-1", name: "Carlos Martínez", status: "confirmed" },
-        { id: "2-2", name: "Laura Martínez", status: "confirmed" }
-      ],
-      invitationLink: "https://foreverinvites.com/i/maria-alejandro/martinez"
-    },
-    {
-      id: "3",
-      name: "Familia López",
-      guests: [
-        { id: "3-1", name: "Miguel López", status: "pending" },
-        { id: "3-2", name: "Sofia López", status: "pending" },
-        { id: "3-3", name: "Emma López", status: "pending" },
-        { id: "3-4", name: "Lucas López", status: "pending" }
-      ],
-      invitationLink: "https://foreverinvites.com/i/maria-alejandro/lopez"
-    },
-    {
-      id: "4",
-      name: "Familia Rodríguez",
-      guests: [
-        { id: "4-1", name: "Diego Rodríguez", status: "confirmed" },
-        { id: "4-2", name: "Carmen Rodríguez", status: "confirmed" }
-      ],
-      invitationLink: "https://foreverinvites.com/i/maria-alejandro/rodriguez"
-    }
-  ]);
+  const addFamily = useEventStore((state) => state.addFamily);
+
+  const handleAddFamily = async () => {
+    if (!newFamilyName.trim()) return;
+
+    const guests = newGuests.filter((g) => g.trim());
+
+    await addFamily(newFamilyName, newGuests);
+
+    setIsAddFamilyOpen(false);
+    setNewFamilyName("");
+    setNewGuests([""]);
+  };
 
   const getStatusIcon = (status: Guest["status"]) => {
     switch (status) {
@@ -97,48 +75,49 @@ export function GuestManagement() {
     );
   };
 
-  const copyLink = (link: string, familyName: string) => {
+  const copyLink = (link: string) => {
     navigator.clipboard.writeText(link);
-    alert(`Enlace de ${familyName} copiado al portapapeles`);
+    alert(`Enlace de ${link} copiado al portapapeles`);
   };
 
-  const filteredFamilies = families.filter(family => {
-    const matchesSearch = family.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      family.guests.some(guest => guest.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  // Uníon de familias + invitados
+  const familiesWithGuests = families.map(f => ({
+    ...f,
+    guests: guests.filter(g => g.family_id === f.id)
+  }));
 
-    const matchesFilter = filterStatus === "all" ||
-      family.guests.some(guest => guest.status === filterStatus);
+  // Search + filtro
+  const filteredFamilies = familiesWithGuests.filter(family => {
+    const familyName = family.family_name?.toLowerCase() || "";
+    const term = searchTerm.toLowerCase();
+
+    const matchesSearch =
+      familyName.includes(term) ||
+      family.guests.some(g => g.name.toLowerCase().includes(term));
+
+    const matchesFilter =
+      filterStatus === "all" ||
+      family.guests.some(g => g.status === filterStatus);
 
     return matchesSearch && matchesFilter;
   });
 
   const stats = {
-    total: families.reduce((acc, f) => acc + f.guests.length, 0),
-    confirmed: families.reduce((acc, f) => acc + f.guests.filter(g => g.status === "confirmed").length, 0),
-    pending: families.reduce((acc, f) => acc + f.guests.filter(g => g.status === "pending").length, 0),
-    declined: families.reduce((acc, f) => acc + f.guests.filter(g => g.status === "declined").length, 0)
+    total: families.reduce((acc, f) => acc + (f.guests?.length || 0), 0),
+    confirmed: families.reduce(
+      (acc, f) => acc + (f.guests?.filter(g => g.status === "confirmed").length || 0),
+      0
+    ),
+    pending: families.reduce(
+      (acc, f) => acc + (f.guests?.filter(g => g.status === "pending").length || 0),
+      0
+    ),
+    declined: families.reduce(
+      (acc, f) => acc + (f.guests?.filter(g => g.status === "declined").length || 0),
+      0
+    ),
   };
-
-  const handleAddFamily = () => {
-    if (newFamilyName.trim() && newGuests.some(g => g.trim())) {
-      const newFamily: Family = {
-        id: Date.now().toString(),
-        name: newFamilyName,
-        guests: newGuests
-          .filter(g => g.trim())
-          .map((name, index) => ({
-            id: `${Date.now()}-${index}`,
-            name,
-            status: "pending" as const
-          })),
-        invitationLink: `https://foreverinvites.com/i/maria-alejandro/${newFamilyName.toLowerCase().replace(/\s+/g, '-')}`
-      };
-      setFamilies([...families, newFamily]);
-      setIsAddFamilyOpen(false);
-      setNewFamilyName("");
-      setNewGuests([""]);
-    }
-  };
+  const baseUrl = window.location.origin;
 
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
@@ -185,7 +164,7 @@ export function GuestManagement() {
 
       {/* Filters and Actions */}
       <div className="bg-white rounded-md shadow-lg mb-6">
-        <div className="flex flex-col md:flex-row gap-2 flex-wrap">
+        <div className="flex flex-col md:flex-row gap-2 flex-wrap pb-2 px-2">
           {/* Search */}
           <div className="flex-1 relative">
             <Search className="w-5 h-5 absolute left-4 top-4 text-gray-400" />
@@ -299,6 +278,7 @@ export function GuestManagement() {
           const totalCount = family.guests.length;
           const allConfirmed = confirmedCount === totalCount;
           const someConfirmed = confirmedCount > 0 && confirmedCount < totalCount;
+          const familySlug = family.family_slug
 
           return (
             <div key={family.id} className="bg-white rounded-md p-6 shadow-lg hover:shadow-xl transition-all">
@@ -324,7 +304,7 @@ export function GuestManagement() {
 
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => copyLink(family.invitationLink, family.name)}
+                    onClick={() => copyLink(`${baseUrl}/i/${user.id}/${familySlug}`)}
                     className="px-4 py-2 bg-[#faf3eb] rounded-md hover:bg-[#f5e6d3] transition-all flex items-center gap-2 text-sm"
                   >
                     <Copy className="w-4 h-4" />

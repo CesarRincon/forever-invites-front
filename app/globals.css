@@ -24,6 +24,23 @@
   --font-alex: "Alex Brush", cursive;
   --font-caveat: "Caveat", cursive;
   --font-cinzel: "Cinzel", cursive;
+  --font-romanticLovely: var(--font-romantic);
+  --font-romantic: "romantic";
+  --font-quiet: "quiet";
+}
+
+@font-face {
+  font-family: "romantic";
+  src: url("/fonts/Romantic-Lovely.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "quiet";
+  src: url("/fonts//Quiet-Backyard-Sans.otf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
 }
 
 /* @font-face {

@@ -1,5 +1,6 @@
 
-import { GuestManagement } from '../components/GuestManagement'
+
+import { GuestManagement } from '../components/GuestManagement';
 import { Sidebar } from '../components/Sidebar';
 
 const guestLayout = () => {
