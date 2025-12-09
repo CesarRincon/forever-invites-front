@@ -5,26 +5,22 @@ import {
   XCircle,
   Pause,
   Play,
+  Copy,
+  Check,
 } from "lucide-react";
 
 import { useEffect, useRef, useState } from "react";
 import { CountdownTimer } from "./CountdownTimer";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useReveal } from "../hooks/useReveal";
 import { Carousel } from "./Carousel";
-import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Lottie from "lottie-react";
-import church from "../icons/LottieIcons/church.json";
-import loveHeart from "../icons/LottieIcons/love-hearts.json"
-import cheers from "../icons/LottieIcons/cheers.json"
 import location from "../icons/LottieIcons/location.json"
 import separator from "../icons/LottieIcons/separator.json"
 import calendar from "../icons/LottieIcons/calendar.json"
 import camera from "../icons/LottieIcons/camera.json"
 import sobre from "../icons/LottieIcons/sobre.json"
 import gift from "../icons/LottieIcons/gift.json"
-import pinterest from "../icons/LottieIcons/pinterest.json"
 import gifCard from "../icons/LottieIcons/gif-card.json"
 import { IconLotties } from "./IconLotties";
 
@@ -45,10 +41,25 @@ export function PublicInvitation({
   const family = eventData?.families?.find((f: any) => f?.family_slug === familySlug);
   const [guestsState, setGuestsState] = useState<Guest[]>(family?.guests ?? []);
   const lottieRef = useRef(null);
+  const [copiedField, setCopiedField] = useState(null);
 
   // useEffect(() => {
   //   lottieRef.current?.setSpeed(0.8); // Reduce la velocidad
   // }, []);
+
+  const handleCopy = async (text: any, field: any) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(field);
+
+      setTimeout(() => {
+        setCopiedField(null);
+      }, 2000);
+    } catch (error) {
+      console.error("Error al copiar:", error);
+      alert("No se pudo copiar. Intenta de nuevo.");
+    }
+  };
 
   useEffect(() => {
     setGuestsState(family?.guests)
@@ -235,8 +246,12 @@ export function PublicInvitation({
             <p className="text-2xl font-cinzel !text-black reveal uppercase">
               "{eventData?.message}"
             </p>
+            <p className="text-2xl font-cinzel !text-black reveal uppercase mt-4">
+              <p className="font-bold !text-[#28281C]">Mateo 19:6</p>
+              Como ya no son dos sino uno, que nadie separe lo que Dios ha unido.
+            </p>
           </div>
-        </section >
+        </section>
 
         {/* COUNTDOWN */}
         <section className="py-16 px-4 bg-white" >
@@ -279,7 +294,7 @@ export function PublicInvitation({
           </div>
         </section >
 
-        {/* DATE & LOCATION & PHOTOS*/}
+        {/* DATE & LOCATION*/}
         <section className="py-5 sm:py-16 px-4 bg-white" >
           <div className="max-w-3xl mx-auto">
 
@@ -672,16 +687,45 @@ export function PublicInvitation({
                 <p className="font-cinzel">Transferencias</p>
               </div>
             </div>
-            <div className="flex justify-center flex-col items-center">
-              <p className="font-cinzel !text-xl">
-                Cuenta bancaria
-              </p>
-              <p>
-                Cuenta ahorros Bancolombia: 088-7790-5765
-              </p>
-              <p>Nombre: Giovanny Alexander Daza</p>
-              <p>C.C: 1.090.476.552</p>
+            <div className="flex justify-center flex-col items-center gap-1 mt-6">
+              <p className="font-cinzel !text-xl mb-2">Cuenta bancaria</p>
+
+              {/* Número de cuenta */}
+              <div className="flex items-center gap-2">
+                <p>Cuenta ahorros Bancolombia: 088-7790-5765</p>
+                <button
+                  onClick={() => handleCopy("08877905765", "cuenta")}
+                  className="p-1 rounded hover:bg-gray-200 transition"
+                >
+                  {
+                    copiedField === "cuenta"
+                      ? <Check className="w-4 h-4 text-[#6b7c6a]" />
+                      : <Copy className="w-4 h-4 text-[#6b7c6a]" />
+                  }
+                </button>
+              </div>
+
+              {/* Nombre */}
+              <div className="flex items-center gap-2">
+                <p>Nombre: Giovanny Alexander Daza</p>
+              </div>
+
+              {/* Cédula */}
+              <div className="flex items-center gap-2">
+                <p>C.C: 1.090.476.552</p>
+                <button
+                  onClick={() => handleCopy("1090476552", "cedula")}
+                  className="p-1 rounded hover:bg-gray-200 transition"
+                >
+                  {
+                    copiedField === "cedula"
+                      ? <Check className="w-4 h-4 text-[#6b7c6a]" />
+                      : <Copy className="w-4 h-4 text-[#6b7c6a]" />
+                  }
+                </button>
+              </div>
             </div>
+
           </div>
         </div >
 

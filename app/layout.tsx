@@ -20,14 +20,10 @@ const romanticLovely = localFont({
   style: 'normal',
 });
 
+
 export const metadata: Metadata = {
   title: "Forever Invites",
   description: "Crea tu invitación",
-  icons: {
-    icon: "/iconInvitation.jpg",
-    shortcut: "/iconInvitation.jpg",
-    apple: "/iconInvitation.jpg",
-  },
 };
 
 export function generateViewport() {
