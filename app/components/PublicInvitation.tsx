@@ -50,7 +50,6 @@ export function PublicInvitation({
   //   lottieRef.current?.setSpeed(0.8); // Reduce la velocidad
   // }, []);
 
-
   useEffect(() => {
     setGuestsState(family?.guests)
   }, [family])
@@ -106,6 +105,8 @@ export function PublicInvitation({
 
     playAudio();
   }, []);
+
+  const colors = ["#FAF7ED", "#FFFFFF", "#ECDDCB"];
 
   const formattedDate = (date: any) => {
     const meses = [
@@ -179,7 +180,7 @@ export function PublicInvitation({
           {/* IMAGEN DE FONDO */}
           <div className="absolute inset-0">
             <img
-              src={eventData?.cover_image}
+              src={eventData?.cover_image ?? eventData?.coverImage}
               className="w-full h-full object-cover lg:w-[50%] object-[80%_50%] lg:object-[80%_50%]"
             />
           </div>
@@ -289,7 +290,7 @@ export function PublicInvitation({
                   lottieRef={lottieRef}
                   animationData={calendar}
                   loop={true}
-                  style={{ width: 100, height: 100 }}
+                  style={{ width: 90, height: 90 }}
                 />
               </div>
 
@@ -310,7 +311,7 @@ export function PublicInvitation({
                 {dateFormatted}
               </p>
 
-              <p className="text-3xl text-center font-light text-[#2f2f2f] mb-6">
+              <p className="text-sm text-center text-[#6b6b6b] mb-4 font-light">
                 {timeFormatted}
               </p>
             </div>
@@ -322,7 +323,7 @@ export function PublicInvitation({
                   lottieRef={lottieRef}
                   animationData={location}
                   loop={true}
-                  style={{ width: 100, height: 100 }}
+                  style={{ width: 90, height: 90 }}
                 />
               </div>
 
@@ -558,44 +559,28 @@ export function PublicInvitation({
         <section className="py-12 px-4 bg-white" >
           <div className="max-w-4xl mx-auto reveal">
             <div className="bg-[#faf6ef] border border-[#8b9e8a] rounded-3xl p-10 pt-2 shadow-xl text-center flex flex-col items-center">
-              {/* <Image src={"/dress-code.png"} alt="dress-code" width={150} height={200} /> */}
               <img src="https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/dresscode.gif" alt="" width={200} height={200} />
-              {/* <Lottie
-                lottieRef={lottieRef}
-                animationData={location}
-                loop={true}
-                style={{ width: 90, height: 90 }}
-              /> */}
               <h3 className="text-2xl text-center !text-[#6b7c6a] font-cinzel tracking-[0.3em] mb-4">Dress Code</h3>
               {/* <p className="text-xl text-center mb-1 text-[#3a3a3a] font-light tracking-wide font-cinzel">Elegante</p> */}
-              <p className="text-xl text-center mb-1 text-[#3a3a3a] font-light tracking-wide font-cinzel">Queremos que este día se sienta tan especial para ustedes como para nosotros. Por eso escogimos una paleta de colores para vestirnos en armonía. Si quieren inspirarse, aquí les compartimos algunas ideas</p>
-              <div className="flex justify-evenly w-full items-center">
-                <a
-                  href={'https://pin.it/1FUghdDGL'}
-                  target="_blank"
-                  className="px-8 py-2 border border-[#8b9e8a] text-[#6b7c6a] text-sm uppercase tracking-wider transition-colors font-light rounded-md hover:bg-[#6b7c6a] hover:text-white mt-4 flex gap-2"
-                >
-                  <Lottie
-                    lottieRef={lottieRef}
-                    animationData={pinterest}
-                    loop={true}
-                    style={{ width: 20, height: 20 }}
-                  />
-                  Damas
-                </a>
-                <a
-                  href={'https://pin.it/5xFvcQ7Qy'}
-                  target="_blank"
-                  className="px-8 py-2 border border-[#8b9e8a] text-[#6b7c6a] text-sm uppercase tracking-wider transition-colors font-light rounded-md hover:bg-[#6b7c6a] hover:text-white mt-4 flex gap-2"
-                >
-                  <Lottie
-                    lottieRef={lottieRef}
-                    animationData={pinterest}
-                    loop={true}
-                    style={{ width: 20, height: 20, color: "#ffff" }}
-                  />
-                  Caballeros
-                </a>
+              <p className="text-xl text-center mb-1 text-[#3a3a3a] font-light tracking-wide font-cinzel">Queremos que este día se sienta tan especial para ustedes como para nosotros, por eso elegimos una paleta que refleje armonía, calma y elegancia.</p>
+              <p className="text-xl text-center mb-1 text-[#3a3a3a] font-light tracking-wide font-cinzel">
+                Siéntete libre de elegir el color con el que más cómodo(a) te sientas y acompáñanos en este momento tan especial para nuestras vidas.
+              </p>
+              <div className="flex flex-col items-center gap-2 mt-4">
+                <p className="text-xl text-center mb-1 text-[#28281C tracking-wide font-cinzel font-bold">Estos son los colores que hemos reservado para el novio y la novia.</p>
+                <div className="flex items-center gap-0 relative">
+                  {colors.map((color, i) => (
+                    <div
+                      key={i}
+                      className="w-20 h-20 rounded-full border border-[#6b7c6a] shadow-md"
+                      style={{
+                        backgroundColor: color,
+                        marginLeft: i === 0 ? 0 : -25,
+                        zIndex: i,
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -629,7 +614,7 @@ export function PublicInvitation({
 
             <div className="text-center">
               <a
-                href={mapUrl}
+                href={'https://photos.app.goo.gl/SYyVaPD6cvg1n9mL7'}
                 target="_blank"
                 className="inline-block px-8 py-2 border border-[#8b9e8a] text-[#6b7c6a] text-sm uppercase tracking-wider transition-colors font-light rounded-md hover:bg-[#6b7c6a] hover:text-white mt-4"
               >
@@ -673,7 +658,7 @@ export function PublicInvitation({
                   lottieRef={lottieRef}
                   animationData={sobre}
                   loop={true}
-                  style={{ width: 100, height: 100 }}
+                  style={{ width: 90, height: 90 }}
                 />
                 <p className="font-cinzel">Sobres</p>
               </div>
@@ -682,7 +667,7 @@ export function PublicInvitation({
                   lottieRef={lottieRef}
                   animationData={gifCard}
                   loop={true}
-                  style={{ width: 100, height: 100 }}
+                  style={{ width: 90, height: 90 }}
                 />
                 <p className="font-cinzel">Transferencias</p>
               </div>
