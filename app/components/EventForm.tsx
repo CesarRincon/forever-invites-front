@@ -365,8 +365,7 @@ export function EventForm() {
             Detalles adicionales
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            <div>
+            {/* <div>
               <Label htmlFor="dressCode">Código de vestimenta</Label>
               <Select value={eventData.dressCode} onValueChange={(value) => setEventData({ ...eventData, dressCode: value })}>
                 <SelectTrigger className="mt-2">
@@ -391,7 +390,7 @@ export function EventForm() {
                 }
                 options={memoizedOptions}
               />
-            </div>
+            </div> */}
 
             <div>
               <Label htmlFor="music">Canción especial (opcional)</Label>
@@ -473,7 +472,7 @@ export function EventForm() {
 
 
         {/* Galerías de imágenes */}
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
+        {/* <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
           <h4 className="mb-6 flex items-center gap-2">
             <ImageIcon className="w-5 h-5 text-[#e6b8a2]" />
             Hero Images (3 obligatorias)
@@ -529,15 +528,15 @@ export function EventForm() {
               </div>
             )}
           </div>
-        </div>
+        </div> */}
 
-        {renderGallery("Galería Novios", eventData.galleryCouple, "galleryCouple", coupleInputRef)}
+        {/* {renderGallery("Galería Novios", eventData.galleryCouple, "galleryCouple", coupleInputRef)}
         {renderGallery("Galería Lugar", eventData.galleryVenue, "galleryVenue", venueInputRef)}
         {renderGallery("Galería Momentos", eventData.galleryHighlights, "galleryHighlights", highlightsInputRef)}
-
+ */}
 
         {/* Gift Suggestions */}
-        <div className="bg-white rounded-md p-6 md:p-8 shadow-lg">
+        {/* <div className="bg-white rounded-md p-6 md:p-8 shadow-lg">
           <h4 className="mb-6 flex items-center gap-2">🎁 Sugerencias de regalos</h4>
           <div className="space-y-2">
             {(eventData.giftSuggestions || []).map((gift: any, idx: any) => (
@@ -563,7 +562,7 @@ export function EventForm() {
               + Agregar regalo
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* Botones de acción */}
         <div className="flex flex-col sm:flex-row gap-4 sticky bottom-4 bg-white/80 backdrop-blur-lg rounded-md p-4 shadow-2xl">

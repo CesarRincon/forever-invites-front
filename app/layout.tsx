@@ -22,8 +22,22 @@ const romanticLovely = localFont({
 
 export const metadata: Metadata = {
   title: "Forever Invites",
-  description: "Create your invitation",
+  description: "Crea tu invitación",
+  icons: {
+    icon: "/iconInvitation.jpg",
+    shortcut: "/iconInvitation.jpg",
+    apple: "/iconInvitation.jpg",
+  },
 };
+
+export function generateViewport() {
+  return {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  };
+}
 
 const agatho = localFont({
   src: [

@@ -71,7 +71,7 @@ export function CountdownTimer({ targetDate, targetTime, variant = "default" }: 
           <div key={unit} className="text-center">
             <div className="backdrop-blur-sm rounded-md p-4 md:p-6   min-w-[70px] md:min-w-[90px]">
               <div className="text-3xl md:text-5xl text-[#e6b8a2] mb-1 !text-[#6b7c6a] font-bold">
-                {value.toString().padStart(2, '0')}
+                {value?.toString()?.padStart(2, '0')}
               </div>
               <div className="text-xs md:text-sm text-gray-600 uppercase tracking-wider !font-cinzel font-bold">
                 {unit === "days" ? "Días" : unit === "hours" ? "Horas" : unit === "minutes" ? "Min" : "Seg"}
@@ -89,7 +89,7 @@ export function CountdownTimer({ targetDate, targetTime, variant = "default" }: 
         <div key={unit} className="text-center">
           <div className="bg-gradient-to-br from-[#e6b8a2] to-[#d19d86] text-white rounded-xl p-3 md:p-4 min-w-[60px] md:min-w-[80px]">
             <div className="text-2xl md:text-4xl mb-1">
-              {value.toString().padStart(2, '0')}
+              {value?.toString()?.padStart(2, '0')}
             </div>
             <div className="text-[10px] md:text-xs uppercase tracking-wide opacity-90">
               {unit === "days" ? "Días" : unit === "hours" ? "Hrs" : unit === "minutes" ? "Min" : "Seg"}

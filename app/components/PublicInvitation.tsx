@@ -107,14 +107,26 @@ export function PublicInvitation({
     playAudio();
   }, []);
 
-  const galleryImages = [
-    "https://images.unsplash.com/photo-1519741497674-611481863552?w=800",
-    "https://images.unsplash.com/photo-1606800052052-a08af7148866?w=800",
-    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800",
-    "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800",
-    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800",
-    "https://images.unsplash.com/photo-1522413452208-996ff3f3e740?w=800"
-  ];
+  const formattedDate = (date: any) => {
+    const meses = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+
+    const [year, month, day] = date.split("-");
+    return `${parseInt(day)} de ${meses[parseInt(month) - 1]} de ${year}`;
+  }
+
+  const formattedTime = (time: any) => {
+    let [hora, min, seg] = time.split(":").map(Number);
+    const ampm = hora >= 12 ? "PM" : "AM";
+    hora = hora % 12;
+    if (hora === 0) hora = 12; // para las 0:00 y 12:00
+    return `${hora}:${min?.toString()?.padStart(2, "0")} ${ampm}`;
+  }
+
+  const dateFormatted = formattedDate(eventData?.date)
+  const timeFormatted = formattedTime(eventData?.time)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fdf5f5] to-white">
@@ -147,7 +159,7 @@ export function PublicInvitation({
       <audio
         ref={audioRef}
         loop
-        src="https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/audio/JustinBieber-Anyone.mp3"
+        src={eventData?.music}
       />
 
       {/* Background */}
@@ -295,11 +307,11 @@ export function PublicInvitation({
               </div>
 
               <p className="text-xl text-center mb-1 text-[#3a3a3a] font-light tracking-wide font-cinzel">
-                5 de Marzo de 2026
+                {dateFormatted}
               </p>
 
               <p className="text-3xl text-center font-light text-[#2f2f2f] mb-6">
-                5:00 <span className="text-lg">PM</span>
+                {timeFormatted}
               </p>
             </div>
 

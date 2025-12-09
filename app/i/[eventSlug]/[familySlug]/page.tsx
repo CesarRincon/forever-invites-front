@@ -1,5 +1,6 @@
 import { PublicInvitation } from "@/app/components/PublicInvitation";
 import { supabase } from "@/app/lib/supabaseClient";
+import type { Metadata, ResolvingMetadata } from "next";
 
 interface Props {
   params: {
@@ -8,8 +9,75 @@ interface Props {
   };
 }
 
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { eventSlug } = await params;
+
+  const { data: event, error: eventError } = await supabase
+    .from("events")
+    .select(`
+            *,
+            families (
+                id,
+                family_name,
+                family_slug,
+                invitation_link,
+                guests (
+                    id,
+                    name,
+                    status,
+                    family_id
+                )
+            )
+        `)
+    .eq("user_id", eventSlug)
+    .single();
+
+  if (!event) {
+    return {
+      title: "Invitación",
+      description: "Invitación especial",
+    };
+  }
+
+  return {
+    title: event.couple_name,
+    description: event.message || "Invitación especial",
+    icons: {
+      icon: "/iconInvitation.jpg",
+      shortcut: "/iconInvitation.jpg",
+      apple: "/iconInvitation.jpg",
+    },
+    openGraph: {
+      title: event.couple_name,
+      description: event.message,
+      images: event.cover_image ? [event.cover_image] : undefined,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: event.event_name,
+      description: event.message,
+      images: event.cover_image ? [event.cover_image] : undefined,
+    },
+    // Puedes agregar aquí otras metadata (canonical, alternates, etc.)
+  };
+}
+
+export function generateViewport() {
+  return {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  };
+}
+
+
 export default async function InvitationPage({ params }: Props) {
-  const { eventSlug, familySlug } = await params;
+  const { eventSlug } = await params;
 
   // 1. Buscar evento por slug
   const { data: event, error: eventError } = await supabase

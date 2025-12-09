@@ -11,7 +11,6 @@ import { useEventStore } from "./store/useEventStore";
 import { Toaster, toast } from "sonner";
 import { useNotificationStore } from "./store/useNotificationsStore";
 import { supabaseRealtime } from "./lib/supabasRealtime";
-import AuthLayout from "./_components/AuthLayout";
 
 type Page = "landing" | "dashboard" | "event" | "guests" | "templates" | "settings" | "preview";
 

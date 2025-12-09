@@ -194,7 +194,7 @@ export const useEventStore = create(
           gallery_highlights: eventData.galleryHighlights,
           gift_suggestions: eventData.giftSuggestions,
           cover_image: coverUrl,
-          map_link: "",
+          map_link: eventData.mapLink ?? '',
         };
 
         const { data: existingEvent } = await supabase

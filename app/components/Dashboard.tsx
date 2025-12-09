@@ -11,34 +11,44 @@ export function Dashboard() {
   const user = useAuthStore((state) => state.user)
   const { eventData, setEventData, saveEvent, loadEvent } = useEventStore();
   const isDisabled = !eventData || !eventData.groom;
+  const families = useEventStore((state) => state.families)
   const [loading, setLoading] = useState(true)
 
   const stats = [
     {
       icon: Users,
       label: "Total Invitados",
-      value: 1,
+      value: families?.reduce((acc: any, f: any) => acc + (f.guests?.length || 0), 0),
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-50"
     },
     {
       icon: CheckCircle2,
       label: "Confirmados",
-      value: 2,
+      value: families?.reduce(
+        (acc: any, f: any) => acc + (f.guests?.filter((g: any) => g.status === "confirmed").length || 0),
+        0
+      ),
       color: "from-green-500 to-green-600",
       bgColor: "bg-green-50"
     },
     {
       icon: Clock,
       label: "Pendientes",
-      value: 3,
+      value: families?.reduce(
+        (acc: any, f: any) => acc + (f.guests?.filter((g: any) => g.status === "pending").length || 0),
+        0
+      ),
       color: "from-amber-500 to-amber-600",
       bgColor: "bg-amber-50"
     },
     {
       icon: XCircle,
       label: "No asisten",
-      value: 0,
+      value: families?.reduce(
+        (acc: any, f: any) => acc + (f.guests?.filter((g: any) => g.status === "declined").length || 0),
+        0
+      ),
       color: "from-red-500 to-red-600",
       bgColor: "bg-red-50"
     }
