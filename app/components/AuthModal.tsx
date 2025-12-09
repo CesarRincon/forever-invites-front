@@ -14,8 +14,6 @@ export const AuthModal = () => {
     const [mode, setMode] = useState("login"); // login | register
     const [showPassword, setShowPassword] = useState(false);
 
-    const setUser = useAuthStore((state) => state.setUser);
-
     const router = useRouter()
 
     const isLogin = mode === "login";
@@ -36,13 +34,11 @@ export const AuthModal = () => {
                 password,
             });
 
-            console.log("🚀 ~ handleSubmit ~ error:", error)
             if (error) {
                 console.error("Error login:", error.message);
                 return;
             }
             setOpen(false);
-            console.log("Usuario logueado: ", data.user.user_metadata);
             router.push('/dashboard')
         } else {
             // REGISTRO
@@ -63,7 +59,6 @@ export const AuthModal = () => {
 
             setOpen(false);
             router.push('/dashboard')
-            console.log("Usuario registrado:", data.user);
         }
     };
 

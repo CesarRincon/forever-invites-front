@@ -1,34 +1,44 @@
 'use client'
-import { Calendar, MapPin, Palette, Music, Shirt, Upload, Save, Image as ImageIcon, X } from "lucide-react";
+import { Calendar, Shirt, Upload, Save, Image as ImageIcon, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { EventData, useEventStore } from "../store/useEventStore";
-import SimpleMDE from "react-simplemde-editor";
-import "easymde/dist/easymde.min.css";
+// import SimpleMDE from "react-simplemde-editor";
+// import "easymde/dist/easymde.min.css";
 import { useAuthStore } from "../store/useAuthStore";
+import dynamic from 'next/dynamic';
+
+
+const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-32 bg-gray-100 rounded-md animate-pulse flex items-center justify-center">
+      <p className="text-gray-500">Cargando editor...</p>
+    </div>
+  ),
+});
 
 const options = {
   spellChecker: false,
   placeholder: "Detalles sobre la vestimenta…",
   autofocus: false,
   status: false,
-  toolbar: [
-    "bold",
-    "italic",
-    "heading",
-    "|",
-    "unordered-list",
-    "ordered-list",
-    "|",
-    "preview"
-  ]
+  // toolbar: [
+  //   "bold",
+  //   "italic",
+  //   "heading",
+  //   "|",
+  //   "unordered-list",
+  //   "ordered-list",
+  //   "|",
+  //   "preview"
+  // ]
 };
 
 export function EventForm() {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const heroInputRef = useRef<HTMLInputElement>(null);
   const coupleInputRef = useRef<HTMLInputElement>(null);
   const venueInputRef = useRef<HTMLInputElement>(null);
@@ -37,22 +47,6 @@ export function EventForm() {
   const user = useAuthStore((state) => state.user)
 
   const { eventData, setEventData, saveEvent, loadEvent } = useEventStore();
-
-  const templates = [
-    { id: "romantic-garden", name: "Jardín Romántico", color: "#f8e8e8" },
-    { id: "classic-elegance", name: "Elegancia Clásica", color: "#f5e6d3" },
-    { id: "modern-minimal", name: "Minimalista Moderno", color: "#e8ebe7" },
-    { id: "rustic-charm", name: "Encanto Rústico", color: "#d4d8d0" }
-  ];
-
-  const colors = [
-    { name: "Rose Gold", value: "#e6b8a2" },
-    { name: "Blush Pink", value: "#f8e8e8" },
-    { name: "Nude", value: "#f5e6d3" },
-    { name: "Sage Green", value: "#d4d8d0" },
-    { name: "Champagne", value: "#f7e7ce" },
-    { name: "Lavender", value: "#e6e6fa" }
-  ];
 
   // ===== Handlers =====
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, field: keyof EventData) => {
@@ -89,7 +83,7 @@ export function EventForm() {
   };
 
   const removeGiftSuggestion = (index: number) => {
-    setEventData({ ...eventData, giftSuggestions: eventData.giftSuggestions.filter((_, i) => i !== index) });
+    setEventData({ ...eventData, giftSuggestions: eventData.giftSuggestions.filter((_: any, i: any) => i !== index) });
   };
 
   const [loading, setLoading] = useState(true);
@@ -105,11 +99,10 @@ export function EventForm() {
     componentDidMount()
   }, [user?.id]);
 
-
   const renderGallery = (
     title: string,
     images: string[],
-    key: keyof EventData,
+    key: keyof any,
     inputRef: any
   ) => (
     <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
@@ -156,7 +149,7 @@ export function EventForm() {
                 if (!file) return;
                 const reader = new FileReader();
                 reader.onloadend = () => {
-                  setEventData(prev => ({
+                  setEventData((prev: any) => ({
                     ...prev,
                     [key]: [...(prev[key] || []), reader.result as string],
                   }));
@@ -420,7 +413,7 @@ export function EventForm() {
           </h4>
 
           <div className="space-y-4">
-            {eventData.itinerary.map((item, index) => (
+            {eventData.itinerary.map((item: any, index: any) => (
               <div key={index} className="flex gap-4 items-center p-4 bg-[#faf3eb] rounded-md">
 
                 {/* Hora */}
@@ -452,7 +445,7 @@ export function EventForm() {
                   onClick={() =>
                     setEventData({
                       ...eventData,
-                      itinerary: eventData.itinerary.filter((_, i) => i !== index),
+                      itinerary: eventData.itinerary.filter((_: any, i: any) => i !== index),
                     })
                   }
                   className="text-red-500 hover:text-red-700 px-3"
@@ -487,7 +480,7 @@ export function EventForm() {
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {eventData.heroImages.map((img, index) => (
+            {eventData.heroImages.map((img: any, index: any) => (
               <div key={index} className="relative rounded-2xl overflow-hidden">
                 <img
                   src={img}
@@ -547,7 +540,7 @@ export function EventForm() {
         <div className="bg-white rounded-md p-6 md:p-8 shadow-lg">
           <h4 className="mb-6 flex items-center gap-2">🎁 Sugerencias de regalos</h4>
           <div className="space-y-2">
-            {(eventData.giftSuggestions || []).map((gift, idx) => (
+            {(eventData.giftSuggestions || []).map((gift: any, idx: any) => (
               <div key={idx} className="flex gap-2 items-center">
                 <Input
                   value={gift.name}

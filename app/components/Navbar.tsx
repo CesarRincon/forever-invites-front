@@ -32,9 +32,9 @@ export function Navbar({ variant = "solid" }: NavbarProps) {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#" className={`${textClass} hover:text-[#e6b8a2] transition-colors`}>
+            {/* <a href="#" className={`${textClass} hover:text-[#e6b8a2] transition-colors`}>
               Plantillas
-            </a>
+            </a> */}
             <a href="#" className={`${textClass} hover:text-[#e6b8a2] transition-colors`}>
               Cómo funciona
             </a>
@@ -61,9 +61,9 @@ export function Navbar({ variant = "solid" }: NavbarProps) {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden bg-white shadow-lg rounded-md mt-4 p-6 space-y-4 mb-4">
-            <a href="#" className="block text-gray-800 hover:text-[#e6b8a2] transition-colors py-2">
+            {/* <a href="#" className="block text-gray-800 hover:text-[#e6b8a2] transition-colors py-2">
               Plantillas
-            </a>
+            </a> */}
             <a href="#" className="block text-gray-800 hover:text-[#e6b8a2] transition-colors py-2">
               Cómo funciona
             </a>

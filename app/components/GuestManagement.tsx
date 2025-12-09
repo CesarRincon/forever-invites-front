@@ -1,11 +1,13 @@
 'use client'
 import { Users, Plus, Edit2, Trash2, Copy, Search, Filter, CheckCircle2, Clock, XCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { useEventStore } from "../store/useEventStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { toast } from "sonner";
+import { FamilyFormDialog } from "./FamilyFormDialog";
 
 interface Guest {
   id: string;
@@ -23,26 +25,71 @@ interface Family {
 export function GuestManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "confirmed" | "pending" | "declined">("all");
-  const [isAddFamilyOpen, setIsAddFamilyOpen] = useState(false);
+  // const [isAddFamilyOpen, setIsAddFamilyOpen] = useState(false);
   const [newFamilyName, setNewFamilyName] = useState("");
   const [newGuests, setNewGuests] = useState<string[]>([""]);
   const families = useEventStore((state) => state.families)
   const guests = useEventStore((state) => state.guests)
+  const editFamily = useEventStore((state) => state.editFamily)
+  const deleteFamily = useEventStore((state) => state.deleteFamily)
   const user = useAuthStore((state) => state.user)
-  console.log("🚀 ~ GuestManagement ~ families:", families, newGuests)
+  const [baseUrl, setBaseUrl] = useState<any>()
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedFamily, setSelectedFamily] = useState<any>(null);
+  const { loadEvent } = useEventStore();
+
+  const componentDidMount = async () => {
+    if (user?.id) {
+      await loadEvent(user.id);
+    }
+  }
+
+  useEffect(() => {
+    componentDidMount()
+  }, [user?.id])
 
   const addFamily = useEventStore((state) => state.addFamily);
 
-  const handleAddFamily = async () => {
-    if (!newFamilyName.trim()) return;
+  const handleAddFamily = async (data: any) => {
+    if (!data.name.trim()) return;
 
-    const guests = newGuests.filter((g) => g.trim());
+    // const guests = newGuests.filter((g) => g.trim());
 
-    await addFamily(newFamilyName, newGuests);
+    await addFamily(data.name, data.guests);
 
-    setIsAddFamilyOpen(false);
     setNewFamilyName("");
     setNewGuests([""]);
+    toast.success("Familia agregada correctamente");
+  };
+
+  const handleEditFamily = async (data: any) => {
+
+    await editFamily(
+      selectedFamily.id,
+      data.name,
+      data.guests
+    );
+
+    toast.success("Familia actualizada correctamente");
+    setIsEditOpen(false);
+  };
+
+  const handleDeleteFamily = async (familyId: string) => {
+    try {
+      const result = await deleteFamily(familyId);
+
+      if (result?.error) {
+        console.error(result.error);
+        toast.error("No se pudo eliminar la familia.");
+        return;
+      }
+
+      toast.success("Familia eliminada correctamente.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Ocurrió un error al eliminar la familia.");
+    }
   };
 
   const getStatusIcon = (status: Guest["status"]) => {
@@ -75,52 +122,63 @@ export function GuestManagement() {
     );
   };
 
-  const copyLink = (link: string) => {
-    navigator.clipboard.writeText(link);
-    alert(`Enlace de ${link} copiado al portapapeles`);
+  const copyLink = async (link: string) => {
+    if (typeof window === "undefined") return; // Evita SSR siempre
+
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success("Enlace copiado al portapapeles");
+    } catch (e) {
+      console.error(e);
+      toast.error("No se pudo copiar el enlace");
+    }
   };
 
   // Uníon de familias + invitados
-  const familiesWithGuests = families.map(f => ({
+  const familiesWithGuests = families.map((f: any) => ({
     ...f,
-    guests: guests.filter(g => g.family_id === f.id)
+    guests: guests.filter((g: any) => g.family_id === f.id)
   }));
 
   // Search + filtro
-  const filteredFamilies = familiesWithGuests.filter(family => {
+  const filteredFamilies = familiesWithGuests.filter((family: any) => {
     const familyName = family.family_name?.toLowerCase() || "";
     const term = searchTerm.toLowerCase();
 
     const matchesSearch =
       familyName.includes(term) ||
-      family.guests.some(g => g.name.toLowerCase().includes(term));
+      family.guests.some((g: any) => g.name.toLowerCase().includes(term));
 
     const matchesFilter =
       filterStatus === "all" ||
-      family.guests.some(g => g.status === filterStatus);
+      family.guests.some((g: any) => g.status === filterStatus);
 
     return matchesSearch && matchesFilter;
   });
 
   const stats = {
-    total: families.reduce((acc, f) => acc + (f.guests?.length || 0), 0),
+    total: families.reduce((acc: any, f: any) => acc + (f.guests?.length || 0), 0),
     confirmed: families.reduce(
-      (acc, f) => acc + (f.guests?.filter(g => g.status === "confirmed").length || 0),
+      (acc: any, f: any) => acc + (f.guests?.filter((g: any) => g.status === "confirmed").length || 0),
       0
     ),
     pending: families.reduce(
-      (acc, f) => acc + (f.guests?.filter(g => g.status === "pending").length || 0),
+      (acc: any, f: any) => acc + (f.guests?.filter((g: any) => g.status === "pending").length || 0),
       0
     ),
     declined: families.reduce(
-      (acc, f) => acc + (f.guests?.filter(g => g.status === "declined").length || 0),
+      (acc: any, f: any) => acc + (f.guests?.filter((g: any) => g.status === "declined").length || 0),
       0
     ),
   };
-  const baseUrl = window.location.origin;
+
+  useEffect(() => {
+    setBaseUrl(window.location.origin);
+  }, [])
+
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-8 w-full lg:max-w-5xl mx-auto">
       {/* Header */}
 
       <div className="mb-8">
@@ -195,86 +253,42 @@ export function GuestManagement() {
           </div>
 
           {/* Add Family Button */}
-          <Dialog open={isAddFamilyOpen} onOpenChange={setIsAddFamilyOpen}>
-            <DialogTrigger asChild>
-              <button className="px-6 py-3 bg-gradient-to-r from-[#e6b8a2] to-[#d19d86] text-white rounded-md hover:shadow-lg transition-all flex items-center gap-2 whitespace-nowrap">
+          <FamilyFormDialog
+            mode="create"
+            open={isAddOpen}
+            onOpenChange={setIsAddOpen}
+            onSubmit={(data) => {
+              handleAddFamily(data);
+            }}
+            trigger={
+              <button className="px-6 py-3 bg-gradient-to-r from-[#e6b8a2] to-[#d19d86] text-white rounded-md flex items-center gap-2">
                 <Plus className="w-5 h-5" />
                 Agregar familia
               </button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md bg-white rounded-md border-0">
-              <DialogHeader>
-                <DialogTitle>Agregar nueva familia</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 mt-4">
-                <div>
-                  <Label htmlFor="familyName">Nombre de la familia</Label>
-                  <Input
-                    id="familyName"
-                    value={newFamilyName}
-                    onChange={(e) => setNewFamilyName(e.target.value)}
-                    placeholder="Ej: Familia Pérez"
-                    className="mt-2"
-                  />
-                </div>
+            }
+          />
 
-                <div>
-                  <Label>Invitados</Label>
-                  <div className="space-y-2 mt-2">
-                    {newGuests.map((guest, index) => (
-                      <div key={index} className="flex gap-2">
-                        <Input
-                          value={guest}
-                          onChange={(e) => {
-                            const updated = [...newGuests];
-                            updated[index] = e.target.value;
-                            setNewGuests(updated);
-                          }}
-                          placeholder={`Invitado ${index + 1}`}
-                        />
-                        {newGuests.length > 1 && (
-                          <button
-                            onClick={() => setNewGuests(newGuests.filter((_, i) => i !== index))}
-                            className="text-red-500 hover:text-red-700 px-3"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => setNewGuests([...newGuests, ""])}
-                    className="w-full mt-3 py-2 border-2 border-dashed border-gray-300 rounded-md hover:border-[#e6b8a2] hover:bg-[#faf3eb] transition-all text-sm hover:cursor-pointer"
-                  >
-                    + Agregar invitado
-                  </button>
-                </div>
+          <FamilyFormDialog
+            mode="edit"
+            open={isEditOpen}
+            onOpenChange={setIsEditOpen}
+            defaultValues={{
+              name: selectedFamily?.name,
+              guests: selectedFamily?.guests.map((g: any) => g.name)
+            }}
+            onSubmit={(data) => {
+              handleEditFamily(data);
+            }}
+          />
 
-                <div className="flex gap-3 pt-4">
-                  <button
-                    onClick={() => setIsAddFamilyOpen(false)}
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 hover:cursor-pointer"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleAddFamily}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-[#e6b8a2] to-[#d19d86] text-white rounded-md hover:shadow-lg hover:cursor-pointer"
-                  >
-                    Guardar
-                  </button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+
         </div>
       </div>
 
       {/* Families List */}
       <div className="space-y-4">
-        {filteredFamilies.map((family) => {
-          const confirmedCount = family.guests.filter(g => g.status === "confirmed").length;
+        {filteredFamilies.map((family: any) => {
+          const confirmedCount = family.guests.filter((g: any) => g.status === "confirmed").length;
           const totalCount = family.guests.length;
           const allConfirmed = confirmedCount === totalCount;
           const someConfirmed = confirmedCount > 0 && confirmedCount < totalCount;
@@ -310,11 +324,22 @@ export function GuestManagement() {
                     <Copy className="w-4 h-4" />
                     Copiar enlace
                   </button>
-                  <button className="px-4 py-2 bg-[#faf3eb] rounded-md hover:bg-[#f5e6d3] transition-all flex items-center gap-2 text-sm">
+                  <button className="px-4 py-2 bg-[#faf3eb] rounded-md hover:bg-[#f5e6d3] transition-all flex items-center gap-2 text-sm" onClick={() => {
+                    setIsEditOpen(true)
+                    setSelectedFamily({
+                      id: family.id,
+                      name: family.family_name,
+                      guests: family.guests,
+                      slug: family.family_slug
+                    });
+                  }}>
                     <Edit2 className="w-4 h-4" />
                     Editar
                   </button>
-                  <button className="px-4 py-2 bg-red-50 rounded-md hover:bg-red-100 transition-all flex items-center gap-2 text-sm text-red-600">
+                  <button
+                    className="px-4 py-2 bg-red-50 rounded-md hover:bg-red-100 transition-all flex items-center gap-2 text-sm text-red-600"
+                    onClick={() => handleDeleteFamily(family.id)}
+                  >
                     <Trash2 className="w-4 h-4" />
                     Eliminar
                   </button>
@@ -323,7 +348,7 @@ export function GuestManagement() {
 
               {/* Guests List */}
               <div className="space-y-2">
-                {family.guests.map((guest) => (
+                {family.guests.map((guest: any) => (
                   <div key={guest.id} className="flex items-center justify-between p-4 bg-[#faf3eb] rounded-md">
                     <div className="flex items-center gap-3">
                       {getStatusIcon(guest.status)}

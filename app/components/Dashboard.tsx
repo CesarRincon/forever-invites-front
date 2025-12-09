@@ -10,11 +10,8 @@ export function Dashboard() {
 
   const user = useAuthStore((state) => state.user)
   const { eventData, setEventData, saveEvent, loadEvent } = useEventStore();
-  console.log("🚀 ~ Dashboard ~ eventData:", eventData, user)
   const isDisabled = !eventData || !eventData.groom;
-  console.log("🚀 ~ Dashboard ~ isDisabled:", isDisabled)
   const [loading, setLoading] = useState(true)
-
 
   const stats = [
     {
@@ -47,7 +44,7 @@ export function Dashboard() {
     }
   ];
 
-  const quickActions = [
+  const quickActions: any[] = [
     {
       icon: Calendar,
       title: "Editar Evento",
@@ -71,14 +68,14 @@ export function Dashboard() {
     }
   ];
 
-  const recentActivity = [
-    { name: "Familia González", action: "confirmó asistencia", time: "Hace 2 horas", status: "confirmed" },
-    { name: "Familia Martínez", action: "confirmó asistencia", time: "Hace 5 horas", status: "confirmed" },
-    { name: "Familia López", action: "vio la invitación", time: "Hace 1 día", status: "viewed" },
-    { name: "Familia Rodríguez", action: "confirmó asistencia", time: "Hace 2 días", status: "confirmed" },
-    { name: "Familia López", action: "vio la invitación", time: "Hace 1 día", status: "viewed" },
-    { name: "Familia Rodríguez", action: "confirmó asistencia", time: "Hace 2 días", status: "confirmed" },
-  ];
+  // const recentActivity = [
+  //   { name: "Familia González", action: "confirmó asistencia", time: "Hace 2 horas", status: "confirmed" },
+  //   { name: "Familia Martínez", action: "confirmó asistencia", time: "Hace 5 horas", status: "confirmed" },
+  //   { name: "Familia López", action: "vio la invitación", time: "Hace 1 día", status: "viewed" },
+  //   { name: "Familia Rodríguez", action: "confirmó asistencia", time: "Hace 2 días", status: "confirmed" },
+  //   { name: "Familia López", action: "vio la invitación", time: "Hace 1 día", status: "viewed" },
+  //   { name: "Familia Rodríguez", action: "confirmó asistencia", time: "Hace 2 días", status: "confirmed" },
+  // ];
 
   const componentDidMount = async () => {
     if (user?.id) {
@@ -198,7 +195,7 @@ export function Dashboard() {
       </div>
 
       {/* Recent Activity */}
-      <div className="space-y-4 flex flex-col gap-2 max-h-64 overflow-y-auto pr-2 w-full">
+      {/* <div className="space-y-4 flex flex-col gap-2 max-h-64 overflow-y-auto pr-2 w-full">
         <h4 className="mb-6">Actividad reciente</h4>
         <div className="space-y-4 flex flex-col gap-2 max-h-64 overflow-y-auto pr-2">
           {recentActivity.map((activity, index) => (
@@ -221,7 +218,7 @@ export function Dashboard() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </div >
   );
 }

@@ -8,7 +8,8 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  Bell
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -25,8 +26,9 @@ export function Sidebar() {
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "event", label: "Mi Evento", icon: Calendar },
     { id: "guests", label: "Invitados", icon: Users },
-    { id: "templates", label: "Plantillas", icon: Palette },
-    { id: "settings", label: "Configuración", icon: Settings },
+    // { id: "notifications", label: "Notificaciones", icon: Bell },
+    // { id: "templates", label: "Plantillas", icon: Palette },
+    // { id: "settings", label: "Configuración", icon: Settings },
   ];
 
   const MenuItem = ({ item }: { item: typeof menuItems[0] }) => {
@@ -35,7 +37,7 @@ export function Sidebar() {
 
     return (
       <Link
-        href={item.id}
+        href={`/${item.id}`}
         onClick={() => {
           setIsOpen(false);
         }}

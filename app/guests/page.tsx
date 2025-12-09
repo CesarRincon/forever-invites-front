@@ -1,14 +1,20 @@
 
 
+import AuthLayout from '../_components/AuthLayout';
 import { GuestManagement } from '../components/GuestManagement';
 import { Sidebar } from '../components/Sidebar';
+import { Toaster } from "sonner";
+
 
 const guestLayout = () => {
     return (
-        <div className='flex flex-col sm:flex-row'>
-            <Sidebar />
-            <GuestManagement />
-        </div>
+        <AuthLayout requireAuth>
+            <div className='flex flex-col lg:flex-row'>
+                <Sidebar />
+                <GuestManagement />
+                <Toaster position="top-right" richColors />
+            </div>
+        </AuthLayout>
     )
 }
 

@@ -1,76 +1,66 @@
 "use client";
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { supabase } from "../lib/supabaseClient";
 import { decodeBase64ToFile } from "../helpers/decodeBase64ToFile";
+export interface EventData {
+  coupleName: string;
+  date: string;
+  time: string;
+  venue: string;
+  address: string;
+  color: string;
+  template: string;
+  music: string;
+  dressCode: string;
+  message: string;
+  itinerary: ItineraryItem[];
+  coverImage?: string;
+}
 
 interface ItineraryItem {
-    time: string;
-    event: string;
-    location?: string;
+  time: string;
+  event: string;
 }
-export interface EventData {
-    coupleName: string;
-    bride: string;
-    groom: string;
 
-    date: string;
-    time: string;
-    venue: string;
-    address: string;
-    mapLink?: string;
-
-    color: string;
-    template: string;
-    music: string;
-
-    dressCode: string;
-    dressCodeDescription: string;
-
-    message: string;
-    itinerary: ItineraryItem[];
-
-    heroImages: string[];
-    galleryCouple: string[];
-    galleryVenue: string[];
-    galleryHighlights: string[];
-
-    giftSuggestions: any[];
-
-    coverImage?: string;
-}
 interface Family {
-    id: string;
-    family_name: string;
-    invitation_link: string;
+  id: string;
+  family_name: string;
+  invitation_link: string;
 }
+
 interface Guest {
-    id: string;
-    name: string;
-    status: string;
-    family_id: string;
+  id: string;
+  name: string;
+  status: string;
+  family_id: string;
 }
 
 interface EventStore {
-    eventId: string | null;
-    eventData: EventData;
-    families: Family[];
-    guests: Guest[];
+  eventId: string | null;
+  eventData: EventData;
+  families: Family[];
+  guests: Guest[];
+  itinerary: ItineraryItem[],
 
-    setEventData: (data: Partial<EventData>) => void;
-    setItinerary: (list: ItineraryItem[]) => void;
+  setEventData: (data: Partial<EventData>) => void;
+  setItinerary: (list: ItineraryItem[]) => void;
 
-    loadEvent: (userId: string) => Promise<void>;
-    saveEvent: (userId: string) => Promise<void>;
+  loadEvent: (userId: string) => Promise<void>;
+  saveEvent: (userId: string) => Promise<void>;
 
-    addFamily: (familyName: string, guestList: string[]) => Promise<string | number>;
-    addGuest: (familyId: string, name: string) => Promise<void>;
-    updateGuestStatus: (guestId: string, status: string) => Promise<void>;
+  addFamily: (familyName: string) => Promise<string>;
+  addGuest: (familyId: string, name: string) => Promise<void>;
+  updateGuestStatus: (guestId: string, status: string) => Promise<void>;
 }
 
-export const useEventStore = create<EventStore>((set, get) => ({
-    eventId: null,
-    eventData: {
+
+export const useEventStore = create(
+  persist(
+    (set, get) => ({
+      eventId: null,
+      eventData: {
         coupleName: "",
         bride: "",
         groom: "",
@@ -78,359 +68,454 @@ export const useEventStore = create<EventStore>((set, get) => ({
         time: "",
         venue: "",
         address: "",
-
         color: "#e6b8a2",
         template: "romantic-garden",
         music: "",
-
         dressCode: "Formal",
         dressCodeDescription: "",
-
         message: "",
         itinerary: [],
-
         heroImages: [],
         galleryCouple: [],
         galleryVenue: [],
         galleryHighlights: [],
-
         giftSuggestions: [],
-
         coverImage: undefined,
-    },
-    families: [],
-    guests: [],
+      },
+      families: [],
+      guests: [],
 
-    setEventData: (data) =>
-        set((state) => ({ eventData: { ...state.eventData, ...data } })),
+      // --------------------------
+      setEventData: (data: any) =>
+        set((state: any) => ({ eventData: { ...state.eventData, ...data } })),
 
-    setItinerary: (list) =>
-        set((state) => ({ eventData: { ...state.eventData, itinerary: list } })),
+      setItinerary: (list: any) =>
+        set((state: any) => ({ eventData: { ...state.eventData, itinerary: list } })),
 
-    // -----------------------------------------------------------
-    // 🔥 CARGAR EVENTO COMPLETO
-    // -----------------------------------------------------------
-    loadEvent: async (userId: string) => {
-        const { data: event, error } = await supabase
-            .from("events")
-            .select(`
-            *,
-            families (
-                id,
-                family_name,
-                family_slug,
-                invitation_link,
-                guests (
-                    id,
-                    name,
-                    status,
-                    family_id
-                )
-            )
-        `)
-            .eq("user_id", userId)
-            .single();
-
-        console.log("EVENT LOADED:", event);
+      // --------------------------
+      loadEvent: async (userId: string) => {
+        const { data: event } = await supabase
+          .from("events")
+          .select(
+            `
+              *,
+              families (
+                  id,
+                  family_name,
+                  family_slug,
+                  invitation_link,
+                  guests (
+                      id,
+                      name,
+                      status,
+                      family_id
+                  )
+              )
+            `
+          )
+          .eq("user_id", userId)
+          .single();
 
         if (!event) return;
 
         const flattenGuests = event.families.flatMap((f: any) => f.guests || []);
 
         set({
-            eventId: event.id,
-            eventData: {
-                coupleName: event.couple_name,
-                bride: event.bride,
-                groom: event.groom,
-                date: event.date,
-                time: event.time,
-                venue: event.venue,
-                address: event.address,
-                color: event.color,
-                template: event.template,
-                music: event.music,
-                dressCode: event.dress_code,
-                dressCodeDescription: event.dress_code_description,
-                message: event.message,
-                itinerary: event.itinerary || [],
-                heroImages: event.hero_images || [],
-                galleryCouple: event.gallery_couple || [],
-                galleryVenue: event.gallery_venue || [],
-                galleryHighlights: event.gallery_highlights || [],
-                giftSuggestions: event.gift_suggestions || [],
-                coverImage: event.cover_image,
-            },
-            families: event.families || [],
-            guests: flattenGuests,
+          eventId: event.id,
+          eventData: {
+            coupleName: event.couple_name,
+            bride: event.bride,
+            groom: event.groom,
+            date: event.date,
+            time: event.time,
+            venue: event.venue,
+            address: event.address,
+            color: event.color,
+            template: event.template,
+            music: event.music,
+            dressCode: event.dress_code,
+            dressCodeDescription: event.dress_code_description,
+            message: event.message,
+            itinerary: event.itinerary || [],
+            heroImages: event.hero_images || [],
+            galleryCouple: event.gallery_couple || [],
+            galleryVenue: event.gallery_venue || [],
+            galleryHighlights: event.gallery_highlights || [],
+            giftSuggestions: event.gift_suggestions || [],
+            coverImage: event.cover_image,
+          },
+          families: event.families || [],
+          guests: flattenGuests,
         });
-    },
+      },
 
-    // -----------------------------------------------------------
-    // 🔥 GUARDAR EVENTO COMPLETO
-    // -----------------------------------------------------------
-    // saveEvent: async (userId: string) => {
-    //     const { eventData } = get();
-
-    //     // 1. Subir portada si viene en base64
-    //     let coverUrl = eventData.coverImage ?? null;
-
-    //     if (eventData.coverImage && eventData.coverImage.startsWith("data:image")) {
-    //         const base64 = eventData.coverImage.split(",")[1];
-    //         const fileName = `event-${userId}-${Date.now()}.png`;
-
-    //         const { data: uploadData } = await supabase
-    //             .storage
-    //             .from("event-images")
-    //             .upload(fileName, decodeBase64ToFile(base64, fileName), {
-    //                 contentType: "image/png",
-    //             });
-
-    //         if (uploadData) {
-    //             coverUrl = supabase
-    //                 .storage
-    //                 .from("event-images")
-    //                 .getPublicUrl(uploadData.path).data.publicUrl;
-    //         }
-    //     }
-
-    //     // 2. Payload completo
-    //     const payload = {
-    //         user_id: userId,
-
-    //         couple_name: eventData.coupleName,
-    //         bride: eventData.bride,
-    //         groom: eventData.groom,
-
-    //         date: eventData.date,
-    //         time: eventData.time,
-    //         venue: eventData.venue,
-    //         address: eventData.address,
-
-    //         color: eventData.color,
-    //         template: eventData.template,
-    //         music: eventData.music,
-
-    //         dress_code: eventData.dressCode,
-    //         dress_code_description: eventData.dressCodeDescription,
-
-    //         message: eventData.message,
-    //         itinerary: eventData.itinerary,
-
-    //         hero_images: eventData.heroImages,
-    //         gallery_couple: eventData.galleryCouple,
-    //         gallery_venue: eventData.galleryVenue,
-    //         gallery_highlights: eventData.galleryHighlights,
-
-    //         gift_suggestions: eventData.giftSuggestions,
-
-    //         cover_image: coverUrl,
-    //     };
-
-    //     // 3. Insert o Update
-    //     if (eventData) {
-    //         const { data, error } = await supabase
-    //             .from("events")
-    //             .insert(payload)
-    //             .select()
-    //             .single();
-    //         console.log("🚀 ~ data:", data, error)
-
-    //         if (data) set({ eventId: data.id });
-    //         return;
-    //     }
-
-    //     await supabase.from("events").update(payload).eq("id", eventId);
-    // },
-    saveEvent: async (userId: string) => {
+      // --------------------------
+      saveEvent: async (userId: string) => {
         const { eventData, eventId } = get();
 
-        // 1. Subir portada si viene en base64
         let coverUrl = eventData.coverImage ?? null;
 
         if (eventData.coverImage && eventData.coverImage.startsWith("data:image")) {
-            const base64 = eventData.coverImage.split(",")[1];
-            const fileName = `event-${userId}-${Date.now()}.png`;
+          const base64 = eventData.coverImage.split(",")[1];
+          const fileName = `event-${userId}-${Date.now()}.png`;
 
-            const { data: uploadData, error: uploadError } = await supabase
-                .storage
-                .from("event-images")
-                .upload(fileName, decodeBase64ToFile(base64, fileName), {
-                    contentType: "image/png",
-                });
+          const { data: uploadData } = await supabase.storage
+            .from("event-images")
+            .upload(fileName, decodeBase64ToFile(base64, fileName), {
+              contentType: "image/png",
+            });
 
-            if (uploadError) {
-                console.error("Error subiendo imagen", uploadError);
-            }
-
-            if (uploadData) {
-                coverUrl = supabase
-                    .storage
-                    .from("event-images")
-                    .getPublicUrl(uploadData.path).data.publicUrl;
-            }
+          if (uploadData) {
+            coverUrl = supabase.storage
+              .from("event-images")
+              .getPublicUrl(uploadData.path).data.publicUrl;
+          }
         }
 
-        // 2. Payload
         const payload = {
-            user_id: userId,
-
-            couple_name: `${eventData.groom} & ${eventData.bride}`,
-            bride: eventData.bride,
-            groom: eventData.groom,
-
-            date: eventData.date,
-            time: eventData.time,
-            venue: eventData.venue,
-            address: eventData.address,
-
-            color: eventData.color,
-            template: eventData.template,
-            music: eventData.music,
-
-            dress_code: eventData.dressCode,
-            dress_code_description: eventData.dressCodeDescription,
-
-            message: eventData.message,
-            itinerary: eventData.itinerary,
-
-            hero_images: eventData.heroImages,
-            gallery_couple: eventData.galleryCouple,
-            gallery_venue: eventData.galleryVenue,
-            gallery_highlights: eventData.galleryHighlights,
-
-            gift_suggestions: eventData.giftSuggestions,
-
-            cover_image: coverUrl,
-
-            map_link: ""
+          user_id: userId,
+          couple_name: `${eventData.groom} & ${eventData.bride}`,
+          bride: eventData.bride,
+          groom: eventData.groom,
+          date: eventData.date,
+          time: eventData.time,
+          venue: eventData.venue,
+          address: eventData.address,
+          color: eventData.color,
+          template: eventData.template,
+          music: eventData.music,
+          dress_code: eventData.dressCode,
+          dress_code_description: eventData.dressCodeDescription,
+          message: eventData.message,
+          itinerary: eventData.itinerary,
+          hero_images: eventData.heroImages,
+          gallery_couple: eventData.galleryCouple,
+          gallery_venue: eventData.galleryVenue,
+          gallery_highlights: eventData.galleryHighlights,
+          gift_suggestions: eventData.giftSuggestions,
+          cover_image: coverUrl,
+          map_link: "",
         };
 
-        // 3. Verificar si el usuario ya tiene un evento creado
         const { data: existingEvent } = await supabase
-            .from("events")
-            .select("id")
-            .eq("user_id", userId)
-            .single();
+          .from("events")
+          .select("id")
+          .eq("user_id", userId)
+          .single();
 
-        // 4. Si existe → UPDATE
         if (existingEvent) {
-            const { data, error } = await supabase
-                .from("events")
-                .update(payload)
-                .eq("id", existingEvent.id)
-                .select()
-                .single();
-
-            console.log("✔ Evento actualizado:", data, error);
-
-            if (data) set({ eventId: data.id });
-
-            return;
-        }
-
-        // 5. Si no existe → INSERT
-        const { data, error } = await supabase
+          const { data } = await supabase
             .from("events")
-            .insert(payload)
+            .update(payload)
+            .eq("id", existingEvent.id)
             .select()
             .single();
+          if (data) set({ eventId: data.id });
+          return;
+        }
 
-        console.log("✔ Evento creado:", data, error);
+        const { data } = await supabase
+          .from("events")
+          .insert(payload)
+          .select()
+          .single();
 
         if (data) set({ eventId: data.id });
-    },
+      },
 
-
-    // -----------------------------------------------------------
-    // FAMILIAS / INVITADOS
-    // -----------------------------------------------------------
-    addFamily: async (familyName: string, guestList: string[]) => {
-        const { eventId, families, guests, eventData } = get();
-        console.log("🚀 ~ eventId:", eventId, eventData)
+      // --------------------------
+      addFamily: async (familyName: string, guestList: string[]) => {
+        const { eventId, families, guests } = get();
 
         const slug = familyName
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
+
+        const { data: newFamilyId } = await supabase.rpc("create_family", {
+          event_id: eventId,
+          family_name: familyName,
+          family_slug: slug,
+        });
+
+        const insertedGuests: any[] = [];
+
+        for (const name of guestList) {
+          const { data: guestId } = await supabase.rpc("add_guest", {
+            p_event_id: eventId,
+            p_family_id: newFamilyId,
+            p_name: name,
+          });
+
+          insertedGuests.push({
+            id: guestId,
+            name,
+            status: "pending",
+            family_id: newFamilyId,
+          });
+        }
+
+        const fullFamily = {
+          id: newFamilyId,
+          family_name: familyName,
+          invitation_link: "",
+          family_slug: slug,
+          guests: insertedGuests,
+        };
+
+        set({
+          families: [...families, fullFamily],
+          guests: [...guests, ...insertedGuests],
+        });
+        return newFamilyId;
+      },
+
+      editFamily: async (familyId: string, newFamilyName: string, updatedGuestNames: string[]) => {
+        try {
+          const { eventId } = get();
+          if (!familyId) throw new Error("familyId is required");
+          if (!eventId) throw new Error("eventId missing in store");
+
+          // -------------------------------------------------------------
+          // 1) Actualizar nombre de la familia + slug
+          // -------------------------------------------------------------
+          const slug = newFamilyName
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "");
 
+          const { data: updatedFamily, error: familyErr } = await supabase
+            .from("families")
+            .update({ family_name: newFamilyName, family_slug: slug })
+            .eq("id", familyId)
+            .select()
+            .maybeSingle();
 
-        // 1. Crear familia
-        const { data: newFamilyId, error: familyError } = await supabase.rpc(
-            "create_family",
-            {
-                event_id: eventId,
-                family_name: familyName,
-                family_slug: slug
+          if (familyErr) throw familyErr;
+
+          // -------------------------------------------------------------
+          // 2) Obtener invitados actuales desde la BD
+          // -------------------------------------------------------------
+          const { data: currentGuests, error: fetchErr } = await supabase
+            .from("guests")
+            .select("id, name, status, family_id")
+            .eq("family_id", familyId)
+            .order("id", { ascending: true }); // mantener orden estable
+
+          if (fetchErr) throw fetchErr;
+
+          const current = currentGuests || [];
+          const max = Math.max(current.length, updatedGuestNames.length);
+
+          const guestsToUpdate: { id: string; name: string }[] = [];
+          const guestsToInsert: string[] = [];
+          const guestsToDelete: string[] = [];
+
+          // -------------------------------------------------------------
+          // 3) Comparar por índice para detectar:
+          //    - Renombrar
+          //    - Agregar
+          //    - Eliminar
+          // -------------------------------------------------------------
+          for (let i = 0; i < max; i++) {
+            const existing = current[i];
+            const newName = updatedGuestNames[i];
+
+            if (existing && newName) {
+              // Caso: existe y sigue existiendo → comparar nombres
+              if (existing.name !== newName) {
+                guestsToUpdate.push({ id: existing.id, name: newName });
+              }
+            } else if (!existing && newName) {
+              // Caso: agregar nuevo invitado
+              guestsToInsert.push(newName);
+            } else if (existing && !newName) {
+              // Caso: eliminar invitado
+              guestsToDelete.push(existing.id);
             }
-        );
-        if (familyError) throw familyError;
+          }
 
-        // 2. Insertar invitados
-        const insertedGuests: Guest[] = [];
+          // -------------------------------------------------------------
+          // 4) Eliminar invitados
+          // -------------------------------------------------------------
+          if (guestsToDelete.length) {
+            const { error } = await supabase
+              .from("guests")
+              .delete()
+              .in("id", guestsToDelete);
 
-        for (const name of guestList) {
-            const { data: guestId } = await supabase.rpc("add_guest", {
-                p_event_id: eventId,
-                p_family_id: newFamilyId,
-                p_name: name,
-            });
+            if (error) throw error;
+          }
 
-            insertedGuests.push({
-                id: guestId,
-                name,
-                status: "pending",
-                family_id: newFamilyId,
-            });
+          // -------------------------------------------------------------
+          // 5) Renombrar invitados existentes
+          // -------------------------------------------------------------
+          for (const g of guestsToUpdate) {
+            const { error } = await supabase
+              .from("guests")
+              .update({ name: g.name })
+              .eq("id", g.id);
+
+            if (error) throw error;
+          }
+
+          // -------------------------------------------------------------
+          // 6) Insertar nuevos invitados
+          // -------------------------------------------------------------
+          if (guestsToInsert.length) {
+            const payload = guestsToInsert.map((name) => ({
+              family_id: familyId,
+              event_id: eventId,
+              name,
+
+              status: "pending",
+            }));
+
+            const { error } = await supabase.from("guests").insert(payload);
+            if (error) throw error;
+          }
+
+          // -------------------------------------------------------------
+          // 7) Refrescar familias + invitados desde Supabase
+          // -------------------------------------------------------------
+          const { data: familiesFresh, error: famErr } = await supabase
+            .from("families")
+            .select(`
+        *,
+        guests (
+          id,
+          name,
+          status,
+          family_id
+        )
+      `)
+            .eq("event_id", eventId);
+
+          if (famErr) throw famErr;
+
+          const flattenedGuests = (familiesFresh || []).flatMap(
+            (f: any) => f.guests || []
+          );
+
+          // -------------------------------------------------------------
+          // 8) Guardar en Zustand
+          // -------------------------------------------------------------
+          set({
+            families: familiesFresh || [],
+            guests: flattenedGuests,
+          });
+
+          return { success: true };
+        } catch (err) {
+          console.error("editFamily error:", err);
+          return { error: (err as any).message ?? err };
         }
+      },
 
-        // 3. Armar familia completa para React
-        const fullFamily = {
-            id: newFamilyId,
-            family_name: familyName,
-            invitation_link: "",
-            guests: insertedGuests,
-        };
+      deleteFamily: async (familyId: string) => {
+        try {
+          const { eventId } = get();
 
-        // 4. Actualizar Zustand
-        set({
-            families: [...families, fullFamily],
-            guests: [...guests, ...insertedGuests],
-        });
+          if (!familyId) throw new Error("familyId is required");
+          if (!eventId) throw new Error("eventId missing in store");
 
-        return newFamilyId;
-    },
+          // -------------------------------------------------------------
+          // 1. Borrar la familia (Supabase se encarga de borrar invitados)
+          // -------------------------------------------------------------
+          const { error: deleteErr } = await supabase
+            .from("families")
+            .delete()
+            .eq("id", familyId);
 
-    addGuest: async (familyId: string, name: string) => {
+          if (deleteErr) throw deleteErr;
+
+          // -------------------------------------------------------------
+          // 2. Refrescar familias + invitados desde la BD
+          // -------------------------------------------------------------
+          const { data: familiesFresh, error: famErr } = await supabase
+            .from("families")
+            .select(`
+        *,
+        guests (
+          id,
+          name,
+          status,
+          family_id
+        )
+      `)
+            .eq("event_id", eventId);
+
+          if (famErr) throw famErr;
+
+          const flattenedGuests = (familiesFresh || []).flatMap(
+            (f: any) => f.guests || []
+          );
+
+          // -------------------------------------------------------------
+          // 3. Guardar estado actualizado en Zustand
+          // -------------------------------------------------------------
+          set({
+            families: familiesFresh || [],
+            guests: flattenedGuests,
+          });
+
+          return { success: true };
+
+        } catch (err) {
+          console.error("deleteFamily error:", err);
+          return { error: (err as any).message ?? err };
+        }
+      },
+
+      addGuest: async (familyId: string, name: string) => {
         const { eventId, guests } = get();
 
         const { data } = await supabase.rpc("add_guest", {
-            p_event_id: eventId,
-            p_family_id: familyId,
-            p_name: name,
+          p_event_id: eventId,
+          p_family_id: familyId,
+          p_name: name,
         });
 
         set({
-            guests: [...guests, { id: data, name, status: "pending", family_id: familyId }],
+          guests: [
+            ...guests,
+            { id: data, name, status: "pending", family_id: familyId },
+          ],
         });
-    },
+      },
 
-    updateGuestStatus: async (guestId: string, status: string) => {
+      updateGuestStatus: async (guestId: string, status: string) => {
         const { guests, eventId } = get();
 
         await supabase.rpc("update_guest_status", {
-            p_guest_id: guestId,
-            p_status: status,
+          p_guest_id: guestId,
+          p_status: status,
         });
 
         await supabase.rpc("recalc_event_stats", {
-            p_event_id: eventId,
+          p_event_id: eventId,
         });
 
         set({
-            guests: guests.map((g) => (g.id === guestId ? { ...g, status } : g)),
+          guests: guests.map((g: any) =>
+            g.id === guestId ? { ...g, status } : g
+          ),
         });
-    },
-}));
+      },
+    }),
+
+    {
+      name: "event-storage", // clave de localStorage
+      partialize: (state: any) => ({
+        eventId: state.eventId,
+        eventData: state.eventData,
+        families: state.families,
+        guests: state.guests,
+      }),
+    }
+  )
+);

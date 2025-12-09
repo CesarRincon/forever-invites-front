@@ -1,18 +1,10 @@
 "use client";
 
 import {
-  MapPin,
-  Calendar,
-  Clock,
-  Gift,
-  Shirt,
-  Heart,
   CheckCircle2,
   XCircle,
   Pause,
   Play,
-  Church,
-  Music
 } from "lucide-react";
 
 import { useEffect, useRef, useState } from "react";
@@ -34,6 +26,7 @@ import sobre from "../icons/LottieIcons/sobre.json"
 import gift from "../icons/LottieIcons/gift.json"
 import pinterest from "../icons/LottieIcons/pinterest.json"
 import gifCard from "../icons/LottieIcons/gif-card.json"
+import { IconLotties } from "./IconLotties";
 
 
 interface Guest {
@@ -49,43 +42,18 @@ export function PublicInvitation({
   const audioRef = useRef<HTMLAudioElement>(null);
   useReveal(); // ← ACTIVA ANIMACIONES
   const { familySlug } = useParams()
-  const family = eventData.families.find(f => f.family_slug === familySlug);
-  console.log("🚀 ~ PublicInvitation ~ family:", family)
-  const [guestsState, setGuestsState] = useState<Guest[]>(family.guests ?? []);
+  const family = eventData?.families?.find((f: any) => f?.family_slug === familySlug);
+  const [guestsState, setGuestsState] = useState<Guest[]>(family?.guests ?? []);
   const lottieRef = useRef(null);
 
-  useEffect(() => {
-    lottieRef.current?.setSpeed(0.8); // Reduce la velocidad
-  }, []);
+  // useEffect(() => {
+  //   lottieRef.current?.setSpeed(0.8); // Reduce la velocidad
+  // }, []);
 
 
   useEffect(() => {
-    setGuestsState(family.guests)
+    setGuestsState(family?.guests)
   }, [family])
-
-  // const eventData? = {
-  //   coupleName: "Alex & Lina",
-  //   bride: "Lina Castañeda",
-  //   groom: "Alexander Daza",
-  //   date: new Date("2026-03-05T18:00:00"),
-  //   venue: "Hacienda Los Rosales",
-  //   address: "Calle Principal 123, Bogotá",
-  //   message:
-  //     "Con la bendición de Dios y la alegría en nuestros corazones, queremos compartir con ustedes el día más especial de nuestras vidas",
-  //   dressCode: "Formal / Vestido largo",
-  //   dressCodeDescription: "Te pedimos evitar el color blanco",
-  //   itinerary: [
-  //     { time: "18:00", event: "Ceremonia civil", location: "Jardín principal" },
-  //     { time: "19:30", event: "Cóctel de bienvenida", location: "Terraza norte" },
-  //     { time: "21:00", event: "Cena de gala", location: "Salón principal" },
-  //     { time: "23:00", event: "Fiesta", location: "Pista de baile" }
-  //   ],
-  //   giftSuggestions: [
-  //     { icon: Gift, text: "Mesa de regalos Liverpool", link: "#" },
-  //     { icon: Gift, text: "Mesa de regalos Amazon", link: "#" },
-  //     { icon: Heart, text: "Lluvia de sobres" }
-  //   ]
-  // };
 
   const handleConfirmation = async (
     guestId: string,
@@ -195,11 +163,11 @@ export function PublicInvitation({
       <div className="relative z-10">
 
         {/* HERO */}
-        <section className="relative w-full h-dvh overflow-visible bg-white mb-[150px] md:mb-0">
+        <section className="relative w-full h-dvh overflow-visible bg-white mb-[150px] lg:mb-0">
           {/* IMAGEN DE FONDO */}
           <div className="absolute inset-0">
             <img
-              src={eventData.cover_image}
+              src={eventData?.cover_image}
               className="w-full h-full object-cover lg:w-[50%] object-[80%_50%] lg:object-[80%_50%]"
             />
           </div>
@@ -223,11 +191,11 @@ export function PublicInvitation({
               className="absolute top-0 right-0 h-full flex items-center justify-start"
               style={{ width: "55vw", maxWidth: "900px", paddingLeft: "7.5rem", pointerEvents: "auto" }}
             >
-              <div className="px-8 text-left">
-                <h3 className="text-gray-700 tracking-widest text-xl !mb-8 text-center">¡NOS CASAMOS!</h3>
-                <h1 className="font-romantic text-6xl !text-[#ae8f63] mb-3 text-center">{eventData.bride}</h1>
+              <div className="px-8">
+                <p className="text-gray-700 tracking-widest !text-xl !mb-8 text-center font-cinzel">¡NOS CASAMOS!</p>
+                <h1 className="font-romantic text-6xl !text-[#ae8f63] mb-3 text-center">{eventData?.bride}</h1>
                 <p className="font-romantic !text-6xl text-[#ae8f63] mb-3 text-center">&</p>
-                <h1 className="font-romantic text-6xl !text-[#ae8f63] !mb-8 text-center">{eventData.groom}</h1>
+                <h1 className="font-romantic text-6xl !text-[#ae8f63] !mb-8 text-center">{eventData?.groom}</h1>
                 <p className="text-gray-600 tracking-widest text-center">TENEMOS EL HONOR<br />DE INVITARTE A NUESTRA BODA</p>
               </div>
             </div>
@@ -240,25 +208,25 @@ export function PublicInvitation({
             </svg>
             <div className="bg-white py-10 pt-2 px-6 text-center">
               <p className="text-gray-700 tracking-widest !text-lg !mb-8 mt-0 font-cinzel">¡NOS CASAMOS!</p>
-              <h1 className="font-romantic !text-4xl !text-[#ae8f63] mb-3 text-center">{eventData.bride}</h1>
+              <h1 className="font-romantic !text-4xl !text-[#ae8f63] mb-3 text-center">{eventData?.bride}</h1>
               <p className="font-romantic !text-3xl text-[#ae8f63] text-center">&</p>
-              <h1 className="font-romantic text-4xl !text-[#ae8f63] mb-3 text-center">{eventData.groom}</h1>
+              <h1 className="font-romantic !text-4xl !text-[#ae8f63] mb-3 text-center">{eventData?.groom}</h1>
               <p className="text-gray-600 tracking-widest text-sm !mt-6 font-cinzel">TENEMOS EL HONOR<br />DE INVITARTE A NUESTRA BODA</p>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* MESSAGE */}
-        <section className="py-16 px-4 bg-[#f5f1ed]">
+        <section className="py-16 px-4 bg-[#f5f1ed]" >
           <div className="max-w-3xl mx-auto text-center">
             <p className="text-2xl font-cinzel !text-black reveal uppercase">
               "{eventData?.message}"
             </p>
           </div>
-        </section>
+        </section >
 
         {/* COUNTDOWN */}
-        <section className="py-16 px-4 bg-white">
+        <section className="py-16 px-4 bg-white" >
           <div className="max-w-4xl mx-auto text-center">
             <p className="!text-2xl text-center !text-[#6b7c6a] font-cinzel tracking-[0.3em]">
               Cuenta regresiva
@@ -267,10 +235,10 @@ export function PublicInvitation({
               <CountdownTimer targetDate={eventData?.date} targetTime={eventData?.time} variant="elegant" />
             </div>
           </div>
-        </section>
+        </section >
 
         {/* CAROUSEL DE IMÁGENES ROMÁNTICO */}
-        <section className="py-5 sm:py-20 px-4 bg-white">
+        <section className="py-5 sm:py-20 px-4 bg-white" >
           <div className="max-w-6xl mx-auto">
             <div className="reveal">
               <Carousel
@@ -280,18 +248,26 @@ export function PublicInvitation({
                     caption: ""
                   },
                   {
-                    src: "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200",
-                    caption: "Nuestro primer viaje juntos"
+                    src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02344.jpg",
+                    caption: ""
+                  },
+                  {
+                    src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02543.jpg",
+                    caption: ""
+                  },
+                  {
+                    src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02592.jpg",
+                    caption: ""
                   }
                 ]}
                 autoPlayInterval={4000}
               />
             </div>
           </div>
-        </section>
+        </section >
 
         {/* DATE & LOCATION & PHOTOS*/}
-        <section className="py-5 sm:py-16 px-4 bg-white">
+        <section className="py-5 sm:py-16 px-4 bg-white" >
           <div className="max-w-3xl mx-auto">
 
             {/* Religious Ceremony Card */}
@@ -314,7 +290,6 @@ export function PublicInvitation({
                   lottieRef={lottieRef}
                   animationData={separator}
                   loop={true}
-                  animationSpeed={0.7}
                   style={{ width: 900, height: 50 }}
                 />
               </div>
@@ -371,10 +346,10 @@ export function PublicInvitation({
               </div>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* CAROUSEL DE IMÁGENES ROMÁNTICO */}
-        <section className="py-5 sm:py-20 px-4 bg-[#f5f1ed]">
+        <section className="py-5 sm:py-20 px-4 bg-[#f5f1ed]" >
           <div className="max-w-6xl mx-auto">
             <div className="reveal">
               <Carousel
@@ -391,34 +366,38 @@ export function PublicInvitation({
                     src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02375.jpg",
                     caption: ""
                   },
+                  {
+                    src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02649.jpg",
+                    caption: ""
+                  },
                 ]}
                 autoPlayInterval={4000}
               />
             </div>
           </div>
-        </section>
+        </section >
 
         {/* ITINERARY */}
-        <div className="min-h-screen bg-white flex items-center justify-center p-4 md:p-8 lg:p-16">
+        <div className="min-h-screen bg-white flex items-center justify-center p-4 md:p-8 lg:p-16" >
           <div className="w-full max-w-[1400px]">
             {/* Title */}
             <h3 className="text-2xl text-center !text-[#6b7c6a] font-cinzel tracking-[0.3em] mb-10">
-              Itinerary
+              Itinerario
             </h3>
 
             {/* Desktop Layout */}
             <div className="hidden lg:block">
               <div className="relative">
                 {/* Icons Row */}
-                <div className="flex justify-between items-end mb-8 relative">
-                  {eventData.itinerary.map((event, index) => (
+                <div className="flex justify-between items-end mb-4 relative">
+                  {eventData?.itinerary?.map((event: any, index: any) => (
                     <div key={index} className="flex flex-col items-center justify-end" style={{ width: '16.66%' }}>
-                      <div className="mb-4 flex items-center justify-center">
+                      <div className="flex items-center justify-center">
                         <Lottie
                           lottieRef={lottieRef}
-                          animationData={church}
+                          animationData={IconLotties[event.icon]}
                           loop={true}
-                          style={{ width: 200, height: 200 }}
+                          style={{ width: 90, height: 90 }}
                         />
                       </div>
                     </div>
@@ -426,23 +405,23 @@ export function PublicInvitation({
                 </div>
 
                 {/* Horizontal Line */}
-                <div className="w-full h-[1.5px] mb-10" style={{
+                <div className="w-full h-[1.5px] mb-4" style={{
                   background: 'linear-gradient(90deg, rgba(201, 184, 150, 0) 0%, rgba(201, 184, 150, 1) 5%, rgba(201, 184, 150, 1) 95%, rgba(201, 184, 150, 0) 100%)'
                 }}></div>
 
                 {/* Times and Titles */}
                 <div className="flex justify-between">
-                  {eventData.itinerary.map((event, index) => (
+                  {eventData?.itinerary?.map((event: any, index: any) => (
                     <div key={index} className="flex flex-col items-center text-center" style={{ width: '16.66%' }}>
                       <div className="font-light mb-2" style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.5rem)', color: '#C9B896' }}>
-                        {event.time}
+                        {event?.time}
                       </div>
                       <div className="font-light leading-tight" style={{ fontSize: 'clamp(0.875rem, 1.1vw, 1.125rem)', color: '#C9B896' }}>
                         {event.event}
                       </div>
-                      {event.subtitle && (
+                      {event?.subtitle && (
                         <div className="font-light leading-tight" style={{ fontSize: 'clamp(0.875rem, 1.1vw, 1.125rem)', color: '#C9B896' }}>
-                          {event.subtitle}
+                          {event?.subtitle}
                         </div>
                       )}
                     </div>
@@ -460,7 +439,7 @@ export function PublicInvitation({
                 }}></div> */}
 
                 {/* Events */}
-                {eventData.itinerary.map((event, index) => {
+                {eventData.itinerary.map((event: any, index: any) => {
                   const isLeft = index % 2 === 0;
 
                   return (
@@ -505,9 +484,9 @@ export function PublicInvitation({
                               {/* {renderIcon(event.icon)} */}
                               <Lottie
                                 lottieRef={lottieRef}
-                                animationData={loveHeart}
+                                animationData={IconLotties[event.icon]}
                                 loop={true}
-                                style={{ width: 100, height: 100 }}
+                                style={{ width: 70, height: 70 }}
                               />
                             </div>
                           </div>
@@ -547,9 +526,9 @@ export function PublicInvitation({
                             <div className="flex items-center justify-center">
                               <Lottie
                                 lottieRef={lottieRef}
-                                animationData={church}
+                                animationData={IconLotties[event.icon]}
                                 loop={true}
-                                style={{ width: 50, height: 50 }}
+                                style={{ width: 70, height: 70 }}
                               />
                             </div>
                           </div>
@@ -561,19 +540,20 @@ export function PublicInvitation({
               </div>
             </div>
           </div>
-        </div>
+        </div >
 
         {/* DRESS CODE */}
-        <section className="py-12 px-4 bg-white">
+        <section className="py-12 px-4 bg-white" >
           <div className="max-w-4xl mx-auto reveal">
-            <div className="bg-[#faf6ef] border border-[#8b9e8a] rounded-3xl p-10 shadow-xl text-center flex flex-col items-center">
+            <div className="bg-[#faf6ef] border border-[#8b9e8a] rounded-3xl p-10 pt-2 shadow-xl text-center flex flex-col items-center">
               {/* <Image src={"/dress-code.png"} alt="dress-code" width={150} height={200} /> */}
-              <Lottie
+              <img src="https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/dresscode.gif" alt="" width={200} height={200} />
+              {/* <Lottie
                 lottieRef={lottieRef}
                 animationData={location}
                 loop={true}
                 style={{ width: 90, height: 90 }}
-              />
+              /> */}
               <h3 className="text-2xl text-center !text-[#6b7c6a] font-cinzel tracking-[0.3em] mb-4">Dress Code</h3>
               {/* <p className="text-xl text-center mb-1 text-[#3a3a3a] font-light tracking-wide font-cinzel">Elegante</p> */}
               <p className="text-xl text-center mb-1 text-[#3a3a3a] font-light tracking-wide font-cinzel">Queremos que este día se sienta tan especial para ustedes como para nosotros. Por eso escogimos una paleta de colores para vestirnos en armonía. Si quieren inspirarse, aquí les compartimos algunas ideas</p>
@@ -607,12 +587,12 @@ export function PublicInvitation({
               </div>
             </div>
           </div>
-        </section>
+        </section >
 
         {/*PHOTOS*/}
-        <section className="py-16 px-6 bg-white">
+        < section className="py-12 px-6 bg-white" >
           {/*photo*/}
-          <div className="bg-[#f5f1ed] rounded-xl p-10 shadow-lg border border-[#6b7c6a] reveal reveal-delay-1">
+          <div className="bg-[#f5f1ed] rounded-xl p-10 shadow-lg border border-[#6b7c6a] reveal reveal-delay-1" >
             <div className="flex justify-center">
               <Lottie
                 lottieRef={lottieRef}
@@ -627,7 +607,6 @@ export function PublicInvitation({
                 lottieRef={lottieRef}
                 animationData={separator}
                 loop={true}
-                animationSpeed={0.7}
                 style={{ width: "100%", maxWidth: 500, height: 40 }}
               />
             </div>
@@ -645,12 +624,12 @@ export function PublicInvitation({
                 Compartir fotografias
               </a>
             </div>
-          </div>
+          </div >
 
-        </section>
+        </section >
 
         {/* GIFT */}
-        <div className="bg-[#f5f1ed] p-10 shadow-lg">
+        <div className="bg-[#f5f1ed] p-10 shadow-lg" >
           <div className="flex justify-center">
             <Lottie
               lottieRef={lottieRef}
@@ -669,7 +648,6 @@ export function PublicInvitation({
               lottieRef={lottieRef}
               animationData={separator}
               loop={true}
-              animationSpeed={0.7}
               style={{ width: "100%", maxWidth: 500, height: 40 }}
             />
           </div>
@@ -683,7 +661,6 @@ export function PublicInvitation({
                   lottieRef={lottieRef}
                   animationData={sobre}
                   loop={true}
-                  animationSpeed={0.7}
                   style={{ width: 100, height: 100 }}
                 />
                 <p className="font-cinzel">Sobres</p>
@@ -693,7 +670,6 @@ export function PublicInvitation({
                   lottieRef={lottieRef}
                   animationData={gifCard}
                   loop={true}
-                  animationSpeed={0.7}
                   style={{ width: 100, height: 100 }}
                 />
                 <p className="font-cinzel">Transferencias</p>
@@ -701,7 +677,7 @@ export function PublicInvitation({
             </div>
             <div className="flex justify-center flex-col items-center">
               <p className="font-cinzel !text-xl">
-                Cuentas bancarias
+                Cuenta bancaria
               </p>
               <p>
                 Cuenta ahorros Bancolombia: 088-7790-5765
@@ -710,11 +686,10 @@ export function PublicInvitation({
               <p>C.C: 1.090.476.552</p>
             </div>
           </div>
-        </div>
-
+        </div >
 
         {/* RSVP */}
-        <section className="py-16 px-4 bg-white">
+        <section className="py-16 px-4 bg-white" >
           <div className="max-w-4xl mx-auto">
             <h3 className="text-2xl text-center !text-[#6b7c6a] font-cinzel tracking-[0.3em] mb-10 reveal">Confirma tu asistencia</h3>
             <p className="text-xl text-center text-[#3a3a3a] font-light tracking-wide font-cinzel mb-4">
@@ -784,10 +759,10 @@ export function PublicInvitation({
               </div>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* CAROUSEL DE IMÁGENES ROMÁNTICO */}
-        <section className="py-5 sm:py-20 px-4 bg-[#f5f1ed]">
+        {/* <section className="py-5 sm:py-20 px-4 bg-[#f5f1ed]">
           <div className="max-w-6xl mx-auto">
             <div className="reveal">
               <Carousel
@@ -805,7 +780,7 @@ export function PublicInvitation({
               />
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* FOOTER */}
         {/* <section className="py-16 px-4 bg-gradient-to-r from-[#f5e6d3] to-[#f5f1ed] text-center reveal">
@@ -822,7 +797,7 @@ export function PublicInvitation({
           </p>
           <p className="text-gray-400 text-xs">{eventData?.coupleName}</p>
         </footer> */}
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

@@ -13,7 +13,6 @@ export const LoginModal = () => {
     const handleLogin = (e: any) => {
         e.preventDefault();
         // Aquí conectas Supabase o tu lógica de auth
-        console.log("Login...");
     };
 
     return (
