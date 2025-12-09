@@ -58,7 +58,8 @@ export function GuestManagement() {
 
     await addFamily(data.name, data.guests);
 
-    setNewFamilyName("");
+    setSelectedFamily(null);
+    setIsAddOpen(false)
     setNewGuests([""]);
     toast.success("Familia agregada correctamente");
   };
@@ -73,6 +74,7 @@ export function GuestManagement() {
 
     toast.success("Familia actualizada correctamente");
     setIsEditOpen(false);
+    setSelectedFamily(null);
   };
 
   const handleDeleteFamily = async (familyId: string) => {
@@ -288,6 +290,7 @@ export function GuestManagement() {
       {/* Families List */}
       <div className="space-y-4">
         {filteredFamilies.map((family: any) => {
+          console.log("🚀 ~ family:", family)
           const confirmedCount = family.guests.filter((g: any) => g.status === "confirmed").length;
           const totalCount = family.guests.length;
           const allConfirmed = confirmedCount === totalCount;
@@ -309,7 +312,7 @@ export function GuestManagement() {
                       }`} />
                   </div>
                   <div>
-                    <h5>{family.name}</h5>
+                    <h5>{family.family_name}</h5>
                     <p className="text-sm text-gray-600">
                       {confirmedCount} de {totalCount} confirmados
                     </p>

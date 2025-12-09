@@ -33,6 +33,13 @@ export function FamilyFormDialog({
         setGuests(defaultValues?.guests ?? [""]);
     }, [defaultValues]);
 
+    useEffect(() => {
+        if (!open) {
+            setName("");
+            setGuests([""]);
+        }
+    }, [open]);
+
     const title = mode === "create" ? "Agregar nueva familia" : "Editar familia";
     const submitText = mode === "create" ? "Guardar" : "Actualizar";
 
