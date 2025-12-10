@@ -2,8 +2,7 @@
 import { Users, Plus, Edit2, Trash2, Copy, Search, Filter, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Label } from "./ui/label";
+
 import { useEventStore } from "../store/useEventStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { toast } from "sonner";
@@ -282,8 +281,6 @@ export function GuestManagement() {
               handleEditFamily(data);
             }}
           />
-
-
         </div>
       </div>
 
