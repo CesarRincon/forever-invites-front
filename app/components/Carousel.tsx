@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 interface CarouselProps {
-  images: Array<{ src: string; caption: string }>;
+  images: Array<{ src: string; caption: string, position: string }>;
   autoPlayInterval?: number;
 }
 
@@ -96,7 +96,8 @@ export function Carousel({ images, autoPlayInterval = 4000 }: CarouselProps) {
             <ImageWithFallback
               src={image.src}
               alt={image.caption}
-              className="w-full h-full object-cover object-[80%_90%] md:object-center"
+              className={`w-full h-full object-cover md:object-center`}
+              style={{ objectPosition: image.position }}
             />
 
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-[#f5f1ed]/40" />

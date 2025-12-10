@@ -23,6 +23,7 @@ import sobre from "../icons/LottieIcons/sobre.json"
 import gift from "../icons/LottieIcons/gift.json"
 import gifCard from "../icons/LottieIcons/gif-card.json"
 import music from "../icons/LottieIcons/music.json"
+import bell from "../icons/LottieIcons/bell.json"
 import { IconLotties } from "./IconLotties";
 
 
@@ -284,19 +285,24 @@ export function PublicInvitation({
                 images={[
                   {
                     src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02462.jpg",
-                    caption: ""
+                    caption: "",
+                    position: "object-[80%_90%]"
                   },
                   {
                     src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02344.jpg",
-                    caption: ""
+                    caption: "",
+                    position: "80% 87%"
                   },
                   {
                     src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02543.jpg",
-                    caption: ""
+                    caption: "",
+                    position: "80% 100%"
                   },
                   {
                     src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02592.jpg",
-                    caption: ""
+                    caption: "",
+                    position: "80% 90%"
+
                   }
                 ]}
                 autoPlayInterval={4000}
@@ -316,11 +322,11 @@ export function PublicInvitation({
                   lottieRef={lottieRef}
                   animationData={calendar}
                   loop={true}
-                  style={{ width: 90, height: 90 }}
+                  style={{ width: 80, height: 80 }}
                 />
               </div>
 
-              <h3 className="text-2xl font-cinzel text-center !text-[#6b7c6a] w-full tracking-[0.3em]">
+              <h3 className="text-2xl font-cinzel text-center !text-[#6b7c6a] w-full tracking-[0.3em] mt-2">
                 Fecha y hora
               </h3>
 
@@ -395,19 +401,23 @@ export function PublicInvitation({
                 images={[
                   {
                     src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02189.jpg",
-                    caption: ""
+                    caption: "",
+                    position: "80% 85%"
                   },
                   {
                     src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02233.jpg",
-                    caption: ""
+                    caption: "",
+                    position: "80% 50%"
                   },
                   {
                     src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02375.jpg",
-                    caption: ""
+                    caption: "",
+                    position: "80% 90%"
                   },
                   {
                     src: "https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/DSC02649.jpg",
-                    caption: ""
+                    caption: "",
+                    position: "80% 80%"
                   },
                 ]}
                 autoPlayInterval={4000}
@@ -658,11 +668,11 @@ export function PublicInvitation({
               lottieRef={lottieRef}
               animationData={gift}
               loop={true}
-              style={{ width: 90, height: 90 }}
+              style={{ width: 75, height: 75 }}
             />
           </div>
 
-          <h3 className="text-2xl text-center !text-[#6b7c6a] font-cinzel tracking-[0.3em]">
+          <h3 className="text-2xl text-center !text-[#6b7c6a] font-cinzel tracking-[0.3em] mt-2">
             Sugerencias de regalo
           </h3>
 
@@ -693,9 +703,9 @@ export function PublicInvitation({
                   lottieRef={lottieRef}
                   animationData={gifCard}
                   loop={true}
-                  style={{ width: 90, height: 90 }}
+                  style={{ width: 78, height: 78 }}
                 />
-                <p className="font-cinzel">Transferencias</p>
+                <p className="font-cinzel mt-3">Transferencias</p>
               </div>
             </div>
             <div className="flex justify-center flex-col items-center gap-1 mt-6">
@@ -703,20 +713,22 @@ export function PublicInvitation({
 
               {/* Número de cuenta */}
               <div className="flex items-center gap-2">
-                <div className="flex flex-wrap">
-                  <p>Cuenta ahorros Bancolombia:</p>
-                  <p>088-7790-5765</p>
+                <div className="flex flex-wrap justify-center items-center">
+                  <p className="mr-2 text-center">Cuenta ahorros Bancolombia:</p>
+                  <div className="flex">
+                    <p className="text-center">088-7790-5765</p>
+                    <button
+                      onClick={() => handleCopy("08877905765", "cuenta")}
+                      className="p-1 rounded hover:bg-gray-200 transition ml-2"
+                    >
+                      {
+                        copiedField === "cuenta"
+                          ? <Check className="w-4 h-4 text-[#6b7c6a]" />
+                          : <Copy className="w-4 h-4 text-[#6b7c6a]" />
+                      }
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleCopy("08877905765", "cuenta")}
-                  className="p-1 rounded hover:bg-gray-200 transition"
-                >
-                  {
-                    copiedField === "cuenta"
-                      ? <Check className="w-4 h-4 text-[#6b7c6a]" />
-                      : <Copy className="w-4 h-4 text-[#6b7c6a]" />
-                  }
-                </button>
               </div>
 
               {/* Nombre */}
@@ -774,7 +786,12 @@ export function PublicInvitation({
                           ) : guest.status === "declined" ? (
                             <XCircle className="w-6 h-6 text-white" />
                           ) : (
-                            <span className="text-[#6b7c6a]">?</span>
+                            <Lottie
+                              lottieRef={lottieRef}
+                              animationData={bell}
+                              loop={true}
+                              style={{ width: 20, height: 20 }}
+                            />
                           )}
                         </div>
 
