@@ -583,7 +583,7 @@ export function PublicInvitation({
 
         {/* DRESS CODE */}
         <section className="py-12 px-2 bg-white" >
-          <div className="max-w-4xl reveal">
+          <div className="max-w-4xl mx-auto reveal">
             <div className="bg-[#faf6ef] border border-[#8b9e8a] rounded-3xl p-10 pt-2 shadow-xl text-center flex flex-col items-center">
               <img src="https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/dresscode.gif" alt="" width={200} height={200} />
               <h3 className="text-2xl text-center !text-[#6b7c6a] font-cinzel tracking-[0.3em] mb-4">Dress Code</h3>
