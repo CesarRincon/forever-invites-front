@@ -102,7 +102,7 @@ export async function generateMetadata(
   }
 
   // Obtener la URL base de tu aplicación (en producción)
-  const baseUrl = 'https://45eaa1913822.ngrok-free.app';
+  const baseUrl = 'https://www.linaalexwedding.com';
 
   // URL de la imagen de portada
   const coverImageUrl = event.cover_image || `${baseUrl}/default-cover.jpg`;
