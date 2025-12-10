@@ -255,12 +255,12 @@ export function PublicInvitation({
         {/* MESSAGE */}
         <section className="py-16 px-4 bg-[#f5f1ed]" >
           <div className="max-w-3xl mx-auto text-center">
-            <p className="text-2xl font-cinzel !text-black reveal uppercase">
+            <p className="text-2xl font-cinzel !text-black reveal">
               "{eventData?.message}"
             </p>
             <p className="font-bold !text-[#28281C] mt-4">Mateo 19:6</p>
-            <p className="text-2xl font-cinzel !text-black reveal uppercase">
-              Como ya no son dos sino uno, que nadie separe lo que Dios ha unido.
+            <p className="text-sm text-center text-[#28281C] mb-4 font-light italic font-bodoni">
+              "Como ya no son dos sino uno, que nadie separe lo que Dios ha unido."
             </p>
           </div>
         </section>
