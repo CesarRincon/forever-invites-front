@@ -289,7 +289,7 @@ export function GuestManagement() {
 
       {/* Families List */}
       <div className="space-y-4">
-        {filteredFamilies.map((family: any) => {
+        {filteredFamilies.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).map((family: any) => {
           console.log("🚀 ~ family:", family)
           const confirmedCount = family.guests.filter((g: any) => g.status === "confirmed").length;
           const totalCount = family.guests.length;

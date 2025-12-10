@@ -102,7 +102,7 @@ export async function generateMetadata(
   }
 
   // Obtener la URL base de tu aplicación (en producción)
-  const baseUrl = 'https://4a05497af54b.ngrok-free.app';
+  const baseUrl = 'https://45eaa1913822.ngrok-free.app';
 
   // URL de la imagen de portada
   const coverImageUrl = event.cover_image || `${baseUrl}/default-cover.jpg`;
@@ -110,20 +110,12 @@ export async function generateMetadata(
   return {
     title: event.couple_name,
     description: event.message || "Invitación especial",
+    metadataBase: new URL(baseUrl),
     openGraph: {
       title: event.couple_name,
       description: event.message,
-      images: [
-        {
-          url: coverImageUrl,
-          width: 1200,
-          height: 630,
-          alt: event.couple_name,
-        }
-      ],
       type: "website",
-      url: `${baseUrl}/events/${eventSlug}`, // URL de la página
-      siteName: "Tu Sitio de Invitaciones",
+      images: [`/opengraph-image.jpg`],
     },
     twitter: {
       card: "summary_large_image",
@@ -131,8 +123,6 @@ export async function generateMetadata(
       description: event.message,
       images: [coverImageUrl],
     },
-    // Añade metaviewport si no lo tienes
-    metadataBase: new URL(baseUrl),
   };
 }
 
