@@ -57,13 +57,15 @@ export default function App() {
     setCurrentPage("dashboard");
   };
 
-  // Landing Page (no logged in)
-  if (!isLoggedIn && !user?.id) {
-    return (
-      <LandingPage onGetStarted={handleGetStarted} />
-    );
-  } else {
-    router.push("/dashboard")
-  }
+  useEffect(() => {
+    if (user?.id) {
+      router.push("/dashboard");
+    }
+  }, [user?.id, router]);
+
+
+  return (
+    <LandingPage onGetStarted={handleGetStarted} />
+  );
 }
 

@@ -23,7 +23,7 @@ export function Sidebar() {
   const EventData = useEventStore((state) => state.eventData)
 
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "dashboard", label: "Panel de control", icon: LayoutDashboard },
     { id: "event", label: "Mi Evento", icon: Calendar },
     { id: "guests", label: "Invitados", icon: Users },
     // { id: "notifications", label: "Notificaciones", icon: Bell },
