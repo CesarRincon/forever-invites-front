@@ -109,7 +109,8 @@ export const useEventStore = create(
                       name,
                       status,
                       family_id
-                  )
+                  ),
+                  created_at
               )
             `
           )

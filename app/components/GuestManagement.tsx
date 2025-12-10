@@ -177,7 +177,7 @@ export function GuestManagement() {
     setBaseUrl(window.location.origin);
   }, [])
 
-
+  console.log(filteredFamilies.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()), "pruebaa")
   return (
     <div className="p-4 md:p-8 w-full lg:max-w-5xl mx-auto">
       {/* Header */}
