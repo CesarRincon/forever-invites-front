@@ -12,15 +12,19 @@ import {
   Bell
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useEventStore } from "../store/useEventStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 
 export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const EventData = useEventStore((state) => state.eventData)
+  const logout = useAuthStore((state) => state.logout)
+
+  const router = useRouter()
 
   const menuItems = [
     { id: "dashboard", label: "Panel de control", icon: LayoutDashboard },
@@ -111,7 +115,13 @@ export function Sidebar() {
           </nav>
 
           {/* Logout */}
-          <button className="flex items-center gap-3 !px-4 !py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all w-full hover:cursor-pointer">
+          <button
+            onClick={() => {
+              logout()
+              router.push("/")
+            }}
+            className="flex items-center gap-3 !px-4 !py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all w-full hover:cursor-pointer"
+          >
             <LogOut className="w-5 h-5" />
             <span>Cerrar sesión</span>
           </button>

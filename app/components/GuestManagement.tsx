@@ -177,7 +177,6 @@ export function GuestManagement() {
     setBaseUrl(window.location.origin);
   }, [])
 
-
   return (
     <div className="p-4 md:p-8 w-full lg:max-w-5xl mx-auto">
       {/* Header */}

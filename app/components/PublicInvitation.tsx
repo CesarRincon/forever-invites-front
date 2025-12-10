@@ -22,6 +22,7 @@ import camera from "../icons/LottieIcons/camera.json"
 import sobre from "../icons/LottieIcons/sobre.json"
 import gift from "../icons/LottieIcons/gift.json"
 import gifCard from "../icons/LottieIcons/gif-card.json"
+import music from "../icons/LottieIcons/music.json"
 import { IconLotties } from "./IconLotties";
 
 
@@ -144,28 +145,38 @@ export function PublicInvitation({
     <div className="min-h-screen bg-gradient-to-b from-[#fdf5f5] to-white">
 
       {/* Music Player - Fixed Button */}
-      <button
-        onClick={toggleMusic}
-        className="fixed bottom-8 right-8 z-50 w-16 h-16 
-             bg-gradient-to-br from-[#8b9e8a] to-[#6b7c6a] 
-             text-white rounded-full shadow-2xl 
-             hover:scale-110 transition-all flex items-center justify-center group"
-        aria-label={isPlaying ? "Pausar música" : "Reproducir música"}
-      >
-        {isPlaying ? (
-          <Pause className="w-6 h-6" />
-        ) : (
-          <Play className="w-6 h-6 ml-1" />
+      <div className="fixed bottom-8 right-8 z-50">
+        {/* Anillo con pulso */}
+        {isPlaying && (
+          <div className="absolute inset-0 w-14 h-14 
+                    bg-[#8b9e8a] rounded-full 
+                    animate-ping opacity-75" />
         )}
 
-        {/* Tooltip */}
-        <span className="absolute -top-12 right-0 
-                   bg-[#6b7c6a]/90 text-white text-xs 
-                   px-3 py-2 rounded-lg opacity-0 
-                   group-hover:opacity-100 transition-opacity whitespace-nowrap">
-          {isPlaying ? "Pausar" : "Reproducir"} canción
-        </span>
-      </button>
+        {/* Botón principal */}
+        <button
+          onClick={toggleMusic}
+          className="relative w-14 h-14
+         bg-gradient-to-br from-[#8b9e8a] to-[#6b7c6a] 
+         text-white rounded-full shadow-2xl 
+         hover:scale-110 transition-all flex items-center justify-center group"
+          aria-label={isPlaying ? "Pausar música" : "Reproducir música"}
+        >
+          <Lottie
+            lottieRef={lottieRef}
+            animationData={music}
+            loop={true}
+            style={{ width: 40, height: 40 }}
+          />
+
+          <span className="absolute -top-12 right-0 
+               bg-[#6b7c6a]/90 text-white text-xs 
+               px-3 py-2 rounded-lg opacity-0 
+               group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            {isPlaying ? "Pausar" : "Reproducir"} canción
+          </span>
+        </button>
+      </div>
 
       {/* Audio Element - Fall in Love by Selena */}
       <audio
@@ -246,8 +257,8 @@ export function PublicInvitation({
             <p className="text-2xl font-cinzel !text-black reveal uppercase">
               "{eventData?.message}"
             </p>
-            <p className="text-2xl font-cinzel !text-black reveal uppercase mt-4">
-              <p className="font-bold !text-[#28281C]">Mateo 19:6</p>
+            <p className="font-bold !text-[#28281C] mt-4">Mateo 19:6</p>
+            <p className="text-2xl font-cinzel !text-black reveal uppercase">
               Como ya no son dos sino uno, que nadie separe lo que Dios ha unido.
             </p>
           </div>
@@ -571,13 +582,13 @@ export function PublicInvitation({
         </div >
 
         {/* DRESS CODE */}
-        <section className="py-12 px-4 bg-white" >
+        <section className="py-12 px-2 bg-white" >
           <div className="max-w-4xl mx-auto reveal">
             <div className="bg-[#faf6ef] border border-[#8b9e8a] rounded-3xl p-10 pt-2 shadow-xl text-center flex flex-col items-center">
               <img src="https://dpzjwblnfcbqalobtosg.supabase.co/storage/v1/object/public/images/dresscode.gif" alt="" width={200} height={200} />
               <h3 className="text-2xl text-center !text-[#6b7c6a] font-cinzel tracking-[0.3em] mb-4">Dress Code</h3>
               {/* <p className="text-xl text-center mb-1 text-[#3a3a3a] font-light tracking-wide font-cinzel">Elegante</p> */}
-              <p className="text-xl text-center mb-1 text-[#3a3a3a] font-light tracking-wide font-cinzel">Queremos que este día se sienta tan especial para ustedes como para nosotros, por eso elegimos una paleta que refleje armonía, calma y elegancia.</p>
+              <p className="text-xl text-center mb-1 text-[#3a3a3a] font-light tracking-wide font-cinzel">Queremos que este día se sienta tan especial para ustedes como para nosotros.</p>
               <p className="text-xl text-center mb-1 text-[#3a3a3a] font-light tracking-wide font-cinzel">
                 Siéntete libre de elegir el color con el que más cómodo(a) te sientas y acompáñanos en este momento tan especial para nuestras vidas.
               </p>
@@ -692,7 +703,10 @@ export function PublicInvitation({
 
               {/* Número de cuenta */}
               <div className="flex items-center gap-2">
-                <p>Cuenta ahorros Bancolombia: 088-7790-5765</p>
+                <div className="flex flex-wrap">
+                  <p>Cuenta ahorros Bancolombia:</p>
+                  <p>088-7790-5765</p>
+                </div>
                 <button
                   onClick={() => handleCopy("08877905765", "cuenta")}
                   className="p-1 rounded hover:bg-gray-200 transition"
@@ -735,8 +749,8 @@ export function PublicInvitation({
             <h3 className="text-2xl text-center !text-[#6b7c6a] font-cinzel tracking-[0.3em] mb-10 reveal">Confirma tu asistencia</h3>
             <p className="text-xl text-center text-[#3a3a3a] font-light tracking-wide font-cinzel mb-4">
               Decir «No puedo asistir» no es descortés. es honesto.
-              Confirma tu asistencia antes del:
-              5 de Enero
+              Confirma tu asistencia <strong className="font-bold">antes del: </strong>
+              <strong className="font-bold">10 de Enero </strong>
               Para mantenerte en nuestra lista de invitados y unirte a nuestra celebración.
             </p>
             <div className="bg-white rounded-3xl p-10 reveal ">
