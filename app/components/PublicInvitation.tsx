@@ -258,9 +258,9 @@ export function PublicInvitation({
             <p className="text-2xl font-cinzel !text-black reveal uppercase">
               "{eventData?.message}"
             </p>
-            <p className="font-bold !text-[#28281C] mt-4">Mateo 19:6</p>
-            <p className="text-2xl font-cinzel !text-black reveal uppercase">
-              Como ya no son dos sino uno, que nadie separe lo que Dios ha unido.
+            <p className="font-bold !text-[#28281C] mt-4 reveal">Mateo 19:6</p>
+            <p className="text-sm text-center text-[#28281C] mb-4 font-light italic font-bodoni reveal">
+              "Como ya no son dos sino uno, que nadie separe lo que Dios ha unido."
             </p>
           </div>
         </section>
