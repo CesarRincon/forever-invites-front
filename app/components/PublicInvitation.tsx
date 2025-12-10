@@ -255,7 +255,7 @@ export function PublicInvitation({
         {/* MESSAGE */}
         <section className="py-16 px-4 bg-[#f5f1ed]" >
           <div className="max-w-3xl mx-auto text-center">
-            <p className="text-2xl font-cinzel !text-black reveal">
+            <p className="text-2xl font-cinzel !text-black reveal uppercase">
               "{eventData?.message}"
             </p>
             <p className="font-bold !text-[#28281C] mt-4">Mateo 19:6</p>
