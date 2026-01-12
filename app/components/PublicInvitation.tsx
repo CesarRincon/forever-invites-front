@@ -762,7 +762,7 @@ export function PublicInvitation({
             <p className="text-xl text-center text-[#3a3a3a] font-light tracking-wide font-cinzel mb-4">
               Decir «No puedo asistir» no es descortés. es honesto.
               Confirma tu asistencia <strong className="font-bold">antes del: </strong>
-              <strong className="font-bold">10 de Enero </strong>
+              <strong className="font-bold">30 de Enero </strong>
               Para mantenerte en nuestra lista de invitados y unirte a nuestra celebración.
             </p>
             <div className="bg-white rounded-3xl p-10 reveal ">
