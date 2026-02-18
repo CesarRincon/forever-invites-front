@@ -802,32 +802,22 @@ export function PublicInvitation({
 
                       {/* Actions */}
                       {guest.status === "pending" ? (
-                        <></>
-                        // <div className="flex gap-3 justify-center">
-                        //   <button
-                        //     onClick={() => handleConfirmation(guest.id, "confirmed")}
-                        //     className="px-4 py-3 bg-[#6b7c6a] text-white rounded-md shadow-md"
-                        //     disabled
-                        //   >
-                        //     Sí asistiré
-                        //   </button>
+                        <div className="flex gap-3 justify-center">
+                          <button
+                            onClick={() => handleConfirmation(guest.id, "confirmed")}
+                            className="px-4 py-3 bg-[#6b7c6a] text-white rounded-md shadow-md"
+                          >
+                            Sí asistiré
+                          </button>
 
-                        //   <button
-                        //     onClick={() => handleConfirmation(guest.id, "declined")}
-                        //     className="px-4 py-3 bg-white border border-[#8b9e8a] text-[#6b7c6a] rounded-md"
-                        //     disabled
-                        //   >
-                        //     No podré
-                        //   </button>
-                        // </div>
-                      ) : null
-                        // <button
-                        //   onClick={() => handleConfirmation(guest.id, "pending")}
-                        //   className="text-sm text-[#6b7c6a]"
-                        // >
-                        //   Cambiar respuesta
-                        // </button>
-                      }
+                          <button
+                            onClick={() => handleConfirmation(guest.id, "declined")}
+                            className="px-4 py-3 bg-white border border-[#8b9e8a] text-[#6b7c6a] rounded-md"
+                          >
+                            No podré
+                          </button>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 ))}
