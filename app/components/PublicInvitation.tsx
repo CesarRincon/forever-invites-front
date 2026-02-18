@@ -119,7 +119,7 @@ export function PublicInvitation({
     playAudio();
   }, []);
 
-  const colors = ["#FAF7ED", "#FFFFFF", "#ECDDCB"];
+  const colors = ["#FAF7ED", "#FFFFFF", "#ECDDCB", "#6b7c6a"];
 
   const formattedDate = (date: any) => {
     const meses = [
